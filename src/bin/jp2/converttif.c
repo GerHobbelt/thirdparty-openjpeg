@@ -1261,6 +1261,8 @@ opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters)
     convert_32s_CXPX cvtCxToPx = NULL;
     OPJ_INT32* buffer32s = NULL;
     OPJ_INT32* planes[4];
+    OPJ_UINT32 icclen = 0;
+    OPJ_UINT8* iccbuf = NULL;
 
     tif = TIFFOpen(filename, "r");
 
@@ -1454,6 +1456,23 @@ opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters)
         TIFFClose(tif);
         opj_image_destroy(image);
         return NULL;
+    }
+
+    // handle embedded ICC profile (with sanity check on binary size of profile)
+    // backported from grok
+    if ((TIFFGetField(tif, TIFFTAG_ICCPROFILE, &icclen, &iccbuf) == 1) &&
+            icclen > 0 &&
+            icclen < OPJ_MAX_ICC_PROFILE_BUFFER_LEN) {
+        image->icc_profile_len = icclen;
+        image->icc_profile_buf = (OPJ_UINT8*)malloc(icclen);
+        if (!image->icc_profile_buf) {
+            fprintf(stderr, "Could not transfer ICC profile.\n");
+            _TIFFfree(buf);
+            TIFFClose(tif);
+            opj_image_destroy(image);
+            return NULL;
+        }
+        memcpy(image->icc_profile_buf, iccbuf, icclen);
     }
 
     strip = 0;

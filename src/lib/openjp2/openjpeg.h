@@ -152,6 +152,9 @@ typedef size_t   OPJ_SIZE_T;
 #define OPJ_J2K_MCC_DEFAULT_NB_RECORDS      10
 #define OPJ_J2K_MCT_DEFAULT_NB_RECORDS      10
 
+#define OPJ_MAX_ICC_PROFILE_BUFFER_LEN      10000000       /** Maximum length of the ICC Profile buffer */
+
+
 /* UniPG>> */ /* NOT YET USED IN THE V2 VERSION OF OPENJPEG */
 #define JPWL_MAX_NO_TILESPECS   16 /**< Maximum number of tile parts expected by JPWL: increase at your will */
 #define JPWL_MAX_NO_PACKSPECS   16 /**< Maximum number of packet parts expected by JPWL: increase at your will */
