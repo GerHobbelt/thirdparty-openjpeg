@@ -247,6 +247,25 @@ opj_image_t *pngtoimage(const char *read_idf, opj_cparameters_t * params)
         planes[2] += width;
         planes[3] += width;
     }
+
+    // See if iCCP chunk is present
+    // Transfers ICC profile from PNG to JP2, backported from grok
+    if (png_get_valid(png, info, PNG_INFO_iCCP))
+    {
+        OPJ_UINT32 profile_len = 0;
+        png_bytep profile_data = NULL;
+        int  compression = 0;
+        png_charp profile_name = NULL;
+        if (png_get_iCCP(png, info, &profile_name, &compression, &profile_data,
+                         &profile_len) == PNG_INFO_iCCP) {
+            image->icc_profile_len = profile_len;
+            image->icc_profile_buf = (OPJ_UINT8*)malloc(profile_len);
+            if (!image->icc_profile_buf) {
+                goto fin;
+            }
+            memcpy(image->icc_profile_buf, profile_data, profile_len);
+        }
+    }
 fin:
     if (rows) {
         for (i = 0; i < height; ++i)
