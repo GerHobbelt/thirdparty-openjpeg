@@ -352,7 +352,7 @@ include (cmake/OpenJPEGCPack.cmake)
 #-----------------------------------------------------------------------------
 # pkgconfig support
 # enabled by default on Unix, disabled by default on other platforms
-if(UNIX)
+if(UNIX OR OS2)
   option(BUILD_PKGCONFIG_FILES "Build and install pkg-config files" ON)
 else()
   option(BUILD_PKGCONFIG_FILES "Build and install pkg-config files" OFF)

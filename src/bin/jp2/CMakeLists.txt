@@ -64,6 +64,12 @@ foreach(exe opj_decompress opj_compress opj_dump)
       target_link_libraries(${exe} rt)
     endif()
   endif()
+  if(OS2)
+  set_target_properties(${exe} PROPERTIES
+  OS2_DEF_VENDOR "$ENV{VENDOR}"
+  OS2_DEF_PATCH "${OPENJPEG_VERSION_BUILD}"
+  OS2_DEF_VERSION "${OPENJPEG_VERSION}")
+  endif()
   # Install exe
   install(TARGETS ${exe}
     EXPORT OpenJPEGTargets
