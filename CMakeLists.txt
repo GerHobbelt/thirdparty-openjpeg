@@ -106,7 +106,7 @@ endif()
 option(BUILD_DOC "Build the HTML documentation (with doxygen if available)." OFF)
 
 string(TOLOWER ${PROJECT_NAME} projectname)
-set(OPENJPEG_INSTALL_SUBDIR "${projectname}-${OPENJPEG_VERSION_MAJOR}.${OPENJPEG_VERSION_MINOR}")
+set(OPENJPEG_INSTALL_SUBDIR "${projectname}")
 
 if(NOT OPENJPEG_INSTALL_BIN_DIR)
   set(OPENJPEG_INSTALL_BIN_DIR "bin")
