@@ -101,7 +101,7 @@ else()
     add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
   endif()
 endif()
-
+add_library(${OPENJPEG_NAMESPACE}::${OPENJPEG_LIBRARY_NAME} ALIAS ${OPENJPEG_LIBRARY_NAME})
 if(UNIX)
   target_link_libraries(${OPENJPEG_LIBRARY_NAME} m)
 endif()
