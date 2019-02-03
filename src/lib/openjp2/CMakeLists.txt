@@ -91,20 +91,11 @@ if(WIN32)
   add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
   set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME})
 else()
-  if(BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
-    # Builds both static and dynamic libs
-    add_library(${OPENJPEG_LIBRARY_NAME} SHARED ${OPENJPEG_SRCS})
-    add_library(openjp2_static STATIC ${OPENJPEG_SRCS})
-    set_target_properties(openjp2_static PROPERTIES OUTPUT_NAME ${OPENJPEG_LIBRARY_NAME})
-    set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME} openjp2_static)
-    target_include_directories(openjp2_static PUBLIC
-            $<BUILD_INTERFACE:${${OPENJPEG_NAMESPACE}_BINARY_DIR}/src/lib/openjp2>
-            $<INSTALL_INTERFACE:${OPENJPEG_INSTALL_INCLUDE_DIR}>)
-  else()
-    add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
-  endif()
+  add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
 endif()
+
 add_library(${OPENJPEG_NAMESPACE}::${OPENJPEG_LIBRARY_NAME} ALIAS ${OPENJPEG_LIBRARY_NAME})
+
 if(UNIX)
   target_link_libraries(${OPENJPEG_LIBRARY_NAME} m)
 endif()
