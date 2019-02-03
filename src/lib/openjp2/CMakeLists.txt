@@ -97,6 +97,9 @@ else()
     add_library(openjp2_static STATIC ${OPENJPEG_SRCS})
     set_target_properties(openjp2_static PROPERTIES OUTPUT_NAME ${OPENJPEG_LIBRARY_NAME})
     set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME} openjp2_static)
+    target_include_directories(openjp2_static PUBLIC
+            $<BUILD_INTERFACE:${${OPENJPEG_NAMESPACE}_BINARY_DIR}/src/lib/openjp2>
+            $<INSTALL_INTERFACE:${OPENJPEG_INSTALL_INCLUDE_DIR}>)
   else()
     add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
   endif()
@@ -109,6 +112,10 @@ set_target_properties(${OPENJPEG_LIBRARY_NAME} PROPERTIES ${OPENJPEG_LIBRARY_PRO
 if(${CMAKE_VERSION} VERSION_GREATER "2.8.11")
   target_compile_options(${OPENJPEG_LIBRARY_NAME} PRIVATE ${OPENJP2_COMPILE_OPTIONS})
 endif()
+
+target_include_directories(${OPENJPEG_LIBRARY_NAME} PUBLIC
+        $<BUILD_INTERFACE:${${OPENJPEG_NAMESPACE}_BINARY_DIR}/src/lib/openjp2>
+        $<INSTALL_INTERFACE:${OPENJPEG_INSTALL_INCLUDE_DIR}>)
 
 # Install library
 install(TARGETS ${INSTALL_LIBS}
