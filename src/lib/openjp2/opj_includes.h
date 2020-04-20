@@ -68,7 +68,7 @@
 #endif
 
 
-#if defined(WIN32) && !defined(Windows95) && !defined(__BORLANDC__) && \
+#if (defined(WIN32) || defined(WIN64)) && !defined(Windows95) && !defined(__BORLANDC__) && \
   !(defined(_MSC_VER) && _MSC_VER < 1400) && \
   !(defined(__MINGW32__) && __MSVCRT_VERSION__ < 0x800)
 /*
