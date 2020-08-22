@@ -45,6 +45,9 @@
 #include "openjpeg.h"
 #include "convert.h"
 
+// `MBED` in big endian format
+const uint32_t BMP_ICC_PROFILE_EMBEDDED = 0x4d424544;
+
 typedef struct {
     OPJ_UINT16 bfType;      /* 'BM' for Bitmap (19776) */
     OPJ_UINT32 bfSize;      /* Size of the file        */
@@ -720,6 +723,8 @@ opj_image_t* bmptoimage(const char *filename, opj_cparameters_t *parameters)
     OPJ_BOOL l_result = OPJ_FALSE;
     OPJ_UINT8* pData = NULL;
     OPJ_UINT32 stride;
+    OPJ_UINT32 beginningOfInfoHeader = 1;
+    size_t bytesRead;
 
     pLUT[0] = lut_R;
     pLUT[1] = lut_G;
@@ -852,6 +857,33 @@ opj_image_t* bmptoimage(const char *filename, opj_cparameters_t *parameters)
         fclose(IN);
         free(pData);
         return NULL;
+    }
+    // ICC profile, backported from grok
+    if (Info_h.biSize == sizeof(OPJ_BITMAPINFOHEADER) &&
+            Info_h.biColorSpaceType == BMP_ICC_PROFILE_EMBEDDED &&
+            Info_h.biIccProfileSize &&
+            Info_h.biIccProfileSize < OPJ_MAX_ICC_PROFILE_BUFFER_LEN) {
+
+        //allocate buffer
+        image->icc_profile_buf = (OPJ_UINT8*)malloc(Info_h.biIccProfileSize);
+        if (!image->icc_profile_buf) {
+            fclose(IN);
+            free(pData);
+            return NULL;
+        }
+        //read in ICC profile
+        if (fseek(IN, beginningOfInfoHeader + Info_h.biIccProfileData, SEEK_SET)) {
+            fclose(IN);
+            free(pData);
+            return NULL;
+        }
+        bytesRead = fread(image->icc_profile_buf, 1, Info_h.biIccProfileSize, IN);
+        if (bytesRead != Info_h.biIccProfileSize) {
+            fclose(IN);
+            free(pData);
+            return NULL;
+        }
+        image->icc_profile_len = Info_h.biIccProfileSize;
     }
     if (numcmpts == 4U) {
         image->comps[3].alpha = 1;
