@@ -1853,6 +1853,7 @@ static void opj_tcd_free_tile(opj_tcd_t *p_tcd)
     opj_tcd_band_t *l_band = 00;
     opj_tcd_precinct_t *l_precinct = 00;
     OPJ_UINT32 l_nb_precincts;
+    size_t l_nb_resolutions;
     void (* l_tcd_code_block_deallocate)(opj_tcd_precinct_t *) = 00;
 
     if (! p_tcd) {
