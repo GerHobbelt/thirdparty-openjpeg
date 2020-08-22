@@ -1640,7 +1640,6 @@ static OPJ_BOOL opj_j2k_check_poc_val(const opj_poc_t *p_pocs,
     OPJ_UINT32 step_r = p_num_comps * step_c;
     OPJ_UINT32 step_l = p_nb_resolutions * step_r;
     OPJ_BOOL loss = OPJ_FALSE;
-    OPJ_UINT32 layno0 = 0;
 
     assert(p_nb_pocs > 0);
 
@@ -4487,13 +4486,13 @@ static OPJ_BOOL opj_j2k_read_sot(opj_j2k_t *p_j2k,
                 return OPJ_FALSE;
             }
 #else
-                                if (l_current_part >= l_tcp->m_nb_tile_parts){
-                                        opj_event_msg(p_manager, EVT_WARNING, "In SOT marker, TPSot (%d) is not valid regards to the current "
-                                                        "number of tile-part (%d), skipping\n", l_current_part, l_tcp->m_nb_tile_parts );
-                                        p_j2k->m_specific_param.m_decoder.m_sot_length = l_tot_len - 12;
-                                        p_j2k->m_specific_param.m_decoder.m_skip_data = 1;
-                                        return OPJ_TRUE;
-                                }
+            if (l_current_part >= l_tcp->m_nb_tile_parts) {
+                opj_event_msg(p_manager, EVT_WARNING, "In SOT marker, TPSot (%d) is not valid regards to the current "
+                                "number of tile-part (%d), skipping\n", l_current_part, l_tcp->m_nb_tile_parts );
+                p_j2k->m_specific_param.m_decoder.m_sot_length = l_tot_len - 12;
+                p_j2k->m_specific_param.m_decoder.m_skip_data = 1;
+                return OPJ_TRUE;
+            }
 #endif
         }
         if (l_current_part >= l_num_parts) {
@@ -4764,7 +4763,6 @@ static OPJ_BOOL opj_j2k_write_sod(opj_j2k_t *p_j2k,
 
     opj_write_bytes(p_data, J2K_MS_SOD,
                     2);                                 /* SOD */
-    p_data += 2;
 
     /* make room for the EOF marker */
     l_remaining_data =  p_total_data_size - 4;
@@ -7932,13 +7930,6 @@ OPJ_BOOL opj_j2k_setup_encoder(opj_j2k_t *p_j2k,
                       "Not enough memory to allocate tile coding parameters\n");
         return OPJ_FALSE;
     }
-    if (parameters->numpocs) {
-        /* initialisation of POC */
-        opj_j2k_check_poc_val(parameters->POC, parameters->numpocs,
-                              (OPJ_UINT32)parameters->numresolution, image->numcomps,
-                              (OPJ_UINT32)parameters->tcp_numlayers, p_manager);
-        /* TODO MSD use the return value*/
-    }
 
     for (tileno = 0; tileno < cp->tw * cp->th; tileno++) {
         opj_tcp_t *tcp = &cp->tcps[tileno];
@@ -7990,14 +7981,14 @@ OPJ_BOOL opj_j2k_setup_encoder(opj_j2k_t *p_j2k,
             }
 
             if (numpocs_tile) {
-
+                /* initialisation of POC */
                 /* TODO MSD use the return value*/
                 opj_j2k_check_poc_val(parameters->POC, tileno, parameters->numpocs,
                                       (OPJ_UINT32)parameters->numresolution, image->numcomps,
                                       (OPJ_UINT32)parameters->tcp_numlayers, p_manager);
 
                 tcp->POC = 1;
-                tcp->numpocs = numpocs_tile - 1 ;
+                tcp->numpocs = numpocs_tile - 1;
             }
         } else {
             tcp->numpocs = 0;
