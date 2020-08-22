@@ -224,6 +224,7 @@ OPJ_BOOL opj_t2_encode_packets(opj_t2_t* p_t2,
                                OPJ_UINT32 * p_data_written,
                                OPJ_UINT32 p_max_len,
                                opj_codestream_info_t *cstr_info,
+                               opj_tcd_marker_info_t* p_marker_info,
                                OPJ_UINT32 p_tp_num,
                                OPJ_INT32 p_tp_pos,
                                OPJ_UINT32 p_pino,
@@ -310,6 +311,20 @@ OPJ_BOOL opj_t2_encode_packets(opj_t2_t* p_t2,
             opj_pi_destroy(l_pi, l_nb_pocs);
             return OPJ_FALSE;
         }
+
+        if (p_marker_info && p_marker_info->need_PLT) {
+            /* One time use intended */
+            assert(p_marker_info->packet_count == 0);
+            assert(p_marker_info->p_packet_size == NULL);
+
+            p_marker_info->p_packet_size = (OPJ_UINT32*) opj_malloc(
+                                               opj_get_encoding_packet_count(l_image, l_cp, p_tile_no) * sizeof(OPJ_UINT32));
+            if (p_marker_info->p_packet_size == NULL) {
+                opj_pi_destroy(l_pi, l_nb_pocs);
+                return OPJ_FALSE;
+            }
+        }
+
         while (opj_pi_next(l_current_pi)) {
             if (l_current_pi->layno < p_maxlayers) {
                 l_nb_bytes = 0;
@@ -325,6 +340,11 @@ OPJ_BOOL opj_t2_encode_packets(opj_t2_t* p_t2,
                 p_max_len -= l_nb_bytes;
 
                 * p_data_written += l_nb_bytes;
+
+                if (p_marker_info && p_marker_info->need_PLT) {
+                    p_marker_info->p_packet_size[p_marker_info->packet_count] = l_nb_bytes;
+                    p_marker_info->packet_count ++;
+                }
 
                 /* INDEX >> */
                 if (cstr_info) {
@@ -671,6 +691,14 @@ static OPJ_BOOL opj_t2_encode_packet(OPJ_UINT32 tileno,
     OPJ_BOOL packet_empty = OPJ_TRUE;
 #else
     OPJ_BOOL packet_empty = OPJ_FALSE;
+#endif
+
+#ifdef DEBUG_VERBOSE
+    if (p_t2_mode == FINAL_PASS) {
+        fprintf(stderr,
+                "encode packet compono=%d, resno=%d, precno=%d, layno=%d\n",
+                compno, resno, precno, layno);
+    }
 #endif
 
     /* <SOP 0xff91> */
@@ -1297,6 +1325,7 @@ static OPJ_BOOL opj_t2_read_packet_data(opj_t2_t* p_t2,
 {
     OPJ_UINT32 bandno, cblkno;
     OPJ_UINT32 l_nb_code_blocks;
+    OPJ_BOOL truncated;
     OPJ_BYTE *l_current_data = p_src_data;
     opj_tcd_band_t *l_band = 00;
     opj_tcd_cblk_dec_t* l_cblk = 00;
@@ -1339,16 +1368,18 @@ static OPJ_BOOL opj_t2_read_packet_data(opj_t2_t* p_t2,
                 }
             }
 
+            truncated = OPJ_FALSE;
             do {
                 /* Check possible overflow (on l_current_data only, assumes input args already checked) then size */
                 if ((((OPJ_SIZE_T)l_current_data + (OPJ_SIZE_T)l_seg->newlen) <
                         (OPJ_SIZE_T)l_current_data) ||
                         (l_current_data + l_seg->newlen > p_src_data + p_max_length)) {
-                    opj_event_msg(p_manager, EVT_ERROR,
+                    opj_event_msg(p_manager, EVT_WARNING,
                                   "read: segment too long (%d) with max (%d) for codeblock %d (p=%d, b=%d, r=%d, c=%d)\n",
                                   l_seg->newlen, p_max_length, cblkno, p_pi->precno, bandno, p_pi->resno,
                                   p_pi->compno);
-                    return OPJ_FALSE;
+                    truncated = OPJ_TRUE;
+                    l_seg->newlen = (OPJ_UINT32)(p_src_data + p_max_length - l_current_data);
                 }
 
 #ifdef USE_JPWL
@@ -1401,7 +1432,7 @@ static OPJ_BOOL opj_t2_read_packet_data(opj_t2_t* p_t2,
                     ++l_seg;
                     ++l_cblk->numsegs;
                 }
-            } while (l_cblk->numnewpasses > 0);
+            } while (l_cblk->numnewpasses > 0 && truncated == OPJ_FALSE);
 
             l_cblk->real_num_segs = l_cblk->numsegs;
             ++l_cblk;
@@ -1426,6 +1457,7 @@ static OPJ_BOOL opj_t2_skip_packet_data(opj_t2_t* p_t2,
 {
     OPJ_UINT32 bandno, cblkno;
     OPJ_UINT32 l_nb_code_blocks;
+    OPJ_BOOL truncated;
     opj_tcd_band_t *l_band = 00;
     opj_tcd_cblk_dec_t* l_cblk = 00;
     opj_tcd_resolution_t* l_res =
@@ -1469,15 +1501,17 @@ static OPJ_BOOL opj_t2_skip_packet_data(opj_t2_t* p_t2,
                 }
             }
 
+            truncated = OPJ_FALSE;
             do {
                 /* Check possible overflow then size */
                 if (((*p_data_read + l_seg->newlen) < (*p_data_read)) ||
                         ((*p_data_read + l_seg->newlen) > p_max_length)) {
-                    opj_event_msg(p_manager, EVT_ERROR,
-                                  "skip: segment too long (%d) with max (%d) for codeblock %d (p=%d, b=%d, r=%d, c=%d)\n",
+                    opj_event_msg(p_manager, EVT_WARNING,
+                                  "truncate: segment too long (%d) with max (%d) for codeblock %d (p=%d, b=%d, r=%d, c=%d)\n",
                                   l_seg->newlen, p_max_length, cblkno, p_pi->precno, bandno, p_pi->resno,
                                   p_pi->compno);
-                    return OPJ_FALSE;
+                    truncated = OPJ_TRUE;
+                    l_seg->newlen = (OPJ_SIZE_T)(p_max_length - *p_data_read);
                 }
 
 #ifdef USE_JPWL
@@ -1510,7 +1544,7 @@ static OPJ_BOOL opj_t2_skip_packet_data(opj_t2_t* p_t2,
                     ++l_seg;
                     ++l_cblk->numsegs;
                 }
-            } while (l_cblk->numnewpasses > 0);
+            } while (l_cblk->numnewpasses > 0 && truncated == OPJ_FALSE);
 
             ++l_cblk;
         }
