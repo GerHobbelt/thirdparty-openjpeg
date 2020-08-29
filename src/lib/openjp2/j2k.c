@@ -4918,10 +4918,15 @@ static OPJ_BOOL opj_j2k_read_sod(opj_j2k_t *p_j2k,
         /* Check enough bytes left in stream before allocation */
         if ((OPJ_OFF_T)p_j2k->m_specific_param.m_decoder.m_sot_length >
                 opj_stream_get_number_byte_left(p_stream)) {
+#ifdef TILE_ERRORS_ARE_FATAL
+            opj_event_msg(p_manager, EVT_ERROR,
+                          "Tile part length size inconsistent with stream length\n");
+            return OPJ_FALSE;
+#else
             opj_event_msg(p_manager, EVT_WARNING,
                           "Tile part length size inconsistent with stream length\n");
-            //return OPJ_FALSE;
             truncated = OPJ_TRUE;
+#endif
         }
         if (p_j2k->m_specific_param.m_decoder.m_sot_length >
                 UINT_MAX - OPJ_COMMON_CBLK_DATA_EXTRA) {
@@ -7963,7 +7968,6 @@ OPJ_BOOL opj_j2k_setup_encoder(opj_j2k_t *p_j2k,
 
         if (parameters->numpocs) {
             /* initialisation of POC */
-            tcp->POC = 1;
             for (i = 0; i < parameters->numpocs; i++) {
                 if (tileno + 1 == parameters->POC[i].tile)  {
                     opj_poc_t *tcp_poc = &tcp->pocs[numpocs_tile];

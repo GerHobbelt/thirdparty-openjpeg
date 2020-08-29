@@ -1374,12 +1374,20 @@ static OPJ_BOOL opj_t2_read_packet_data(opj_t2_t* p_t2,
                 if ((((OPJ_SIZE_T)l_current_data + (OPJ_SIZE_T)l_seg->newlen) <
                         (OPJ_SIZE_T)l_current_data) ||
                         (l_current_data + l_seg->newlen > p_src_data + p_max_length)) {
+#ifdef TILE_ERRORS_ARE_FATAL
+                    opj_event_msg(p_manager, EVT_ERROR,
+                                  "read: segment too long (%d) with max (%d) for codeblock %d (p=%d, b=%d, r=%d, c=%d)\n",
+                                  l_seg->newlen, p_max_length, cblkno, p_pi->precno, bandno, p_pi->resno,
+                                  p_pi->compno);
+                    return OPJ_FALSE;
+#else
                     opj_event_msg(p_manager, EVT_WARNING,
                                   "read: segment too long (%d) with max (%d) for codeblock %d (p=%d, b=%d, r=%d, c=%d)\n",
                                   l_seg->newlen, p_max_length, cblkno, p_pi->precno, bandno, p_pi->resno,
                                   p_pi->compno);
                     truncated = OPJ_TRUE;
                     l_seg->newlen = (OPJ_UINT32)(p_src_data + p_max_length - l_current_data);
+#endif
                 }
 
 #ifdef USE_JPWL
@@ -1506,12 +1514,20 @@ static OPJ_BOOL opj_t2_skip_packet_data(opj_t2_t* p_t2,
                 /* Check possible overflow then size */
                 if (((*p_data_read + l_seg->newlen) < (*p_data_read)) ||
                         ((*p_data_read + l_seg->newlen) > p_max_length)) {
+#ifdef TILE_ERRORS_ARE_FATAL
+                    opj_event_msg(p_manager, EVT_ERROR,
+                                  "skip: segment too long (%d) with max (%d) for codeblock %d (p=%d, b=%d, r=%d, c=%d)\n",
+                                  l_seg->newlen, p_max_length, cblkno, p_pi->precno, bandno, p_pi->resno,
+                                  p_pi->compno);
+                    return OPJ_FALSE;
+#else
                     opj_event_msg(p_manager, EVT_WARNING,
                                   "truncate: segment too long (%d) with max (%d) for codeblock %d (p=%d, b=%d, r=%d, c=%d)\n",
                                   l_seg->newlen, p_max_length, cblkno, p_pi->precno, bandno, p_pi->resno,
                                   p_pi->compno);
                     truncated = OPJ_TRUE;
                     l_seg->newlen = (OPJ_SIZE_T)(p_max_length - *p_data_read);
+#endif
                 }
 
 #ifdef USE_JPWL
