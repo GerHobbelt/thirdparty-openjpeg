@@ -55,6 +55,9 @@
 #include <ctype.h>
 #include <assert.h>
 #include <limits.h>
+#if defined(_MSC_VER)
+#include <crtdbg.h>
+#endif
 
 /*
   Use fseeko() and ftello() if they are available since they use

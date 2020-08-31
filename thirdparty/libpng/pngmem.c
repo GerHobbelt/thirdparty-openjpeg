@@ -19,6 +19,10 @@
 
 #include "pngpriv.h"
 
+#if defined(_MSC_VER)
+#include <crtdbg.h>
+#endif
+
 #if defined(PNG_READ_SUPPORTED) || defined(PNG_WRITE_SUPPORTED)
 /* Free a png_struct */
 void /* PRIVATE */
