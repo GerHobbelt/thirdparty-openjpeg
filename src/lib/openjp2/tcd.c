@@ -1246,10 +1246,16 @@ static OPJ_BOOL opj_tcd_code_block_enc_allocate_data(opj_tcd_cblk_enc_t *
 
     /* +1 is needed for https://github.com/uclouvain/openjpeg/issues/835 */
     /* and actually +2 required for https://github.com/uclouvain/openjpeg/issues/982 */
+    /* and +7 for https://github.com/uclouvain/openjpeg/issues/1283 (-M 3) */
+    /* and +26 for https://github.com/uclouvain/openjpeg/issues/1283 (-M 7) */
+    /* and +28 for https://github.com/uclouvain/openjpeg/issues/1283 (-M 44) */
+    /* and +33 for https://github.com/uclouvain/openjpeg/issues/1283 (-M 4) */
+    /* and +63 for https://github.com/uclouvain/openjpeg/issues/1283 (-M 4 -IMF 2K) */
+    /* and +74 for https://github.com/uclouvain/openjpeg/issues/1283 (-M 4 -n 8 -s 7,7 -I) */
     /* TODO: is there a theoretical upper-bound for the compressed code */
     /* block size ? */
-    l_data_size = 2 + ((OPJ_SIZE_T)(p_code_block->x1 - p_code_block->x0) *
-                       (OPJ_SIZE_T)(p_code_block->y1 - p_code_block->y0) * sizeof(OPJ_UINT32));
+    l_data_size = 74 + ((OPJ_SIZE_T)(p_code_block->x1 - p_code_block->x0) *
+                        (OPJ_SIZE_T)(p_code_block->y1 - p_code_block->y0) * sizeof(OPJ_UINT32));
 
     if (l_data_size > p_code_block->data_size) {
         if (p_code_block->data) {
@@ -2850,6 +2856,7 @@ void opj_tcd_marker_info_destroy(opj_tcd_marker_info_t *p_tcd_marker_info)
 {
     if (p_tcd_marker_info) {
         opj_free(p_tcd_marker_info->p_packet_size);
+        opj_free(p_tcd_marker_info);
     }
 }
 
