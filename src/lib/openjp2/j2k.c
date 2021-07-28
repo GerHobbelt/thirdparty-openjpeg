@@ -7128,20 +7128,20 @@ static OPJ_BOOL opj_j2k_is_imf_compliant(opj_cparameters_t *parameters,
                       "-> Non-IMF codestream will be generated\n",
                       mainlevel);
         ret = OPJ_FALSE;
-    }
-
-    /* Validate sublevel */
-    assert(sizeof(tabMaxSubLevelFromMainLevel) ==
-           (OPJ_IMF_MAINLEVEL_MAX + 1) * sizeof(tabMaxSubLevelFromMainLevel[0]));
-    if (sublevel > tabMaxSubLevelFromMainLevel[mainlevel]) {
-        opj_event_msg(p_manager, EVT_WARNING,
-                      "IMF profile require sublevel <= %d for mainlevel = %d.\n"
-                      "-> %d is thus not compliant\n"
-                      "-> Non-IMF codestream will be generated\n",
-                      tabMaxSubLevelFromMainLevel[mainlevel],
-                      mainlevel,
-                      sublevel);
-        ret = OPJ_FALSE;
+    } else {
+        /* Validate sublevel */
+        assert(sizeof(tabMaxSubLevelFromMainLevel) ==
+               (OPJ_IMF_MAINLEVEL_MAX + 1) * sizeof(tabMaxSubLevelFromMainLevel[0]));
+        if (sublevel > tabMaxSubLevelFromMainLevel[mainlevel]) {
+            opj_event_msg(p_manager, EVT_WARNING,
+                          "IMF profile require sublevel <= %d for mainlevel = %d.\n"
+                          "-> %d is thus not compliant\n"
+                          "-> Non-IMF codestream will be generated\n",
+                          tabMaxSubLevelFromMainLevel[mainlevel],
+                          mainlevel,
+                          sublevel);
+            ret = OPJ_FALSE;
+        }
     }
 
     /* Number of components */
@@ -7262,7 +7262,7 @@ static OPJ_BOOL opj_j2k_is_imf_compliant(opj_cparameters_t *parameters,
         if (image->comps[i].dy != 1) {
             opj_event_msg(p_manager, EVT_WARNING,
                           "IMF profiles require YRsiz == 1. "
-                          "Here it is set to %d for component i.\n"
+                          "Here it is set to %d for component %d.\n"
                           "-> Non-IMF codestream will be generated\n",
                           image->comps[i].dy, i);
             ret = OPJ_FALSE;
@@ -7526,8 +7526,7 @@ static OPJ_BOOL opj_j2k_is_imf_compliant(opj_cparameters_t *parameters,
             opj_event_msg(p_manager, EVT_WARNING,
                           "IMF profiles require PPx = PPy = 7 for NLLL band, else 8.\n"
                           "-> Supplied values are different from that.\n"
-                          "-> Non-IMF codestream will be generated\n",
-                          NL);
+                          "-> Non-IMF codestream will be generated\n");
             ret = OPJ_FALSE;
         }
     } else {
@@ -7538,8 +7537,7 @@ static OPJ_BOOL opj_j2k_is_imf_compliant(opj_cparameters_t *parameters,
                 opj_event_msg(p_manager, EVT_WARNING,
                               "IMF profiles require PPx = PPy = 7 for NLLL band, else 8.\n"
                               "-> Supplied values are different from that.\n"
-                              "-> Non-IMF codestream will be generated\n",
-                              NL);
+                              "-> Non-IMF codestream will be generated\n");
                 ret = OPJ_FALSE;
             }
         }
