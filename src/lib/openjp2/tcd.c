@@ -2545,8 +2545,6 @@ static OPJ_BOOL opj_tcd_t1_encode(opj_tcd_t *p_tcd)
     return opj_t1_encode_cblks(p_tcd,
                                p_tcd->tcd_image->tiles, l_tcp, l_mct_norms,
                                l_mct_numcomps);
-
-    return OPJ_TRUE;
 }
 
 static OPJ_BOOL opj_tcd_t2_encode(opj_tcd_t *p_tcd,
