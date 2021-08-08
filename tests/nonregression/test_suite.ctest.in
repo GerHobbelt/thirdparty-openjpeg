@@ -32,16 +32,16 @@ opj_compress -i @INPUT_NR_PATH@/random-issue-0005.tif -o @TEMP_PATH@/random-issu
 # related to issue 62
 opj_compress -i @INPUT_NR_PATH@/tmp-issue-0062.raw -o @TEMP_PATH@/tmp-issue-0062-u.raw.j2k -F 512,512,1,16,u
 opj_compress -i @INPUT_NR_PATH@/tmp-issue-0062.raw -o @TEMP_PATH@/tmp-issue-0062-s.raw.j2k -F 512,512,1,16,s
-opj_compress -i @INPUT_NR_PATH@/X_4_2K_24_185_CBR_WB_000.tif -o @TEMP_PATH@/X_4_2K_24_185_CBR_WB_000_C2K_24.j2k -cinema2K 24
-opj_compress -i @INPUT_NR_PATH@/X_5_2K_24_235_CBR_STEM24_000.tif -o @TEMP_PATH@/X_5_2K_24_235_CBR_STEM24_000_C2K_24.j2k -cinema2K 24
-opj_compress -i @INPUT_NR_PATH@/X_6_2K_24_FULL_CBR_CIRCLE_000.tif -o @TEMP_PATH@/X_6_2K_24_FULL_CBR_CIRCLE_000_C2K_24.j2k -cinema2K 24
-opj_compress -i @INPUT_NR_PATH@/X_4_2K_24_185_CBR_WB_000.tif -o @TEMP_PATH@/X_4_2K_24_185_CBR_WB_000_C2K_48.j2k -cinema2K 48
-opj_compress -i @INPUT_NR_PATH@/X_5_2K_24_235_CBR_STEM24_000.tif -o @TEMP_PATH@/X_5_2K_24_235_CBR_STEM24_000_C2K_48.j2k -cinema2K 48
-opj_compress -i @INPUT_NR_PATH@/X_6_2K_24_FULL_CBR_CIRCLE_000.tif -o @TEMP_PATH@/X_6_2K_24_FULL_CBR_CIRCLE_000_C2K_48.j2k -cinema2K 48
-opj_compress -i @INPUT_NR_PATH@/ElephantDream_4K.tif -o @TEMP_PATH@/ElephantDream_4K_C4K.j2k -cinema4K
+opj_compress lossy-check { -n 3 -i prec -m 175:100:212 -p 79:64:92 } -i @INPUT_NR_PATH@/X_4_2K_24_185_CBR_WB_000.tif -o @TEMP_PATH@/X_4_2K_24_185_CBR_WB_000_C2K_24.j2k -cinema2K 24
+opj_compress lossy-check { -n 3 -i prec -m 298:168:363 -p 122:73:164 } -i @INPUT_NR_PATH@/X_5_2K_24_235_CBR_STEM24_000.tif -o @TEMP_PATH@/X_5_2K_24_235_CBR_STEM24_000_C2K_24.j2k -cinema2K 24
+opj_compress lossy-check { -n 3 -i prec -m 76:54:140 -p 56:49:74 } -i @INPUT_NR_PATH@/X_6_2K_24_FULL_CBR_CIRCLE_000.tif -o @TEMP_PATH@/X_6_2K_24_FULL_CBR_CIRCLE_000_C2K_24.j2k -cinema2K 24
+opj_compress lossy-check { -n 3 -i prec -m 384:385:842 -p 135:144:202 } -i @INPUT_NR_PATH@/X_4_2K_24_185_CBR_WB_000.tif -o @TEMP_PATH@/X_4_2K_24_185_CBR_WB_000_C2K_48.j2k -cinema2K 48
+opj_compress lossy-check { -n 3 -i prec -m 933:827:2206 -p 201:184:314 } -i @INPUT_NR_PATH@/X_5_2K_24_235_CBR_STEM24_000.tif -o @TEMP_PATH@/X_5_2K_24_235_CBR_STEM24_000_C2K_48.j2k -cinema2K 48
+opj_compress lossy-check { -n 3 -i prec -m 194:173:531 -p 94:79:154 } -i @INPUT_NR_PATH@/X_6_2K_24_FULL_CBR_CIRCLE_000.tif -o @TEMP_PATH@/X_6_2K_24_FULL_CBR_CIRCLE_000_C2K_48.j2k -cinema2K 48
+opj_compress lossy-check { -n 3 -i prec -m 6:4:7 -p 141:141:191 } -i @INPUT_NR_PATH@/ElephantDream_4K.tif -o @TEMP_PATH@/ElephantDream_4K_C4K.j2k -cinema4K
 # issue 141
 opj_compress -i @INPUT_NR_PATH@/issue141.rawl -o @TEMP_PATH@/issue141.rawl.j2k   -F 2048,32,1,16,u
-opj_compress -i @INPUT_NR_PATH@/issue141.rawl -o @TEMP_PATH@/issue141-I.rawl.j2k -F 2048,32,1,16,u -I
+opj_compress lossy-check { -n 1 -m 0.1 -p 2 } -i @INPUT_NR_PATH@/issue141.tif -o @TEMP_PATH@/issue141-I.rawl.j2k -I
 # issue 46:
 opj_compress -i @INPUT_NR_PATH@/Bretagne2.ppm -o @TEMP_PATH@/Bretagne2_5.j2k -c [64,64]
 # issue 316
@@ -185,6 +185,10 @@ opj_compress_no_raw_lossless -i @INPUT_NR_PATH@/ElephantDream_4K.tif -o @TEMP_PA
 
 opj_compress_no_raw_lossless -i @INPUT_NR_PATH@/byte.tif -o @TEMP_PATH@/byte_PLT.j2k -n 1 -PLT
 opj_compress_no_raw_lossless -i @INPUT_NR_PATH@/byte.tif -o @TEMP_PATH@/byte_PLT.jp2 -n 1 -PLT
+
+opj_compress_no_raw_lossless -i @INPUT_NR_PATH@/byte.tif -o @TEMP_PATH@/byte_TLM.j2k -n 1 -TLM
+# Use tile size 1x1 to generate more than 255 tiles
+opj_compress_no_raw_lossless -i @INPUT_NR_PATH@/byte.tif -o @TEMP_PATH@/byte_TLM_400tiles.j2k -n 1 -t 1,1 -TLM
 
 # DECODER TEST SUITE
 opj_decompress -i  @INPUT_NR_PATH@/Bretagne2.j2k -o @TEMP_PATH@/Bretagne2.j2k.pgx
@@ -645,3 +649,5 @@ opj_decompress -i @INPUT_NR_PATH@/tnsot_zero.jp2 -o @TEMP_PATH@/tnsot_zero.png
 
 # try to decompress file with repeated PPT marker
 !opj_decompress -i @INPUT_NR_PATH@/oss-fuzz2785.jp2 -o @TEMP_PATH@/oss-fuzz2785.png
+
+opj_decompress -i @INPUT_NR_PATH@/tnsot_zero_missing_eoc.jp2 -o @TEMP_PATH@/tnsot_zero_missing_eoc.png

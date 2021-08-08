@@ -187,7 +187,7 @@ static void decode_help_display(void)
             "\n"
             "  -ImgDir <directory> \n"
             "	Image file Directory path \n"
-            "  -OutFor <PBM|PGM|PPM|PNM|PAM|PGX|PNG|BMP|TIF|RAW|RAWL|TGA>\n"
+            "  -OutFor <PBM|PGM|PPM|PNM|PAM|PGX|PNG|BMP|TIF|TIFF|RAW|YUV|RAWL|TGA>\n"
             "    REQUIRED only if -ImgDir is used\n"
             "	Output format for decompressed images.\n");
     fprintf(stdout, "  -i <compressed file>\n"
@@ -427,8 +427,8 @@ int load_images(dircnt_t *dirptr, char *imgdirpath)
 int get_file_format(const char *filename)
 {
     unsigned int i;
-    static const char *extension[] = {"pgx", "pnm", "pgm", "ppm", "bmp", "tif", "raw", "rawl", "tga", "png", "j2k", "jp2", "jpt", "j2c", "jpc" };
-    static const int format[] = { PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, RAW_DFMT, RAWL_DFMT, TGA_DFMT, PNG_DFMT, J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT };
+    static const char *extension[] = {"pgx", "pnm", "pgm", "ppm", "bmp", "tif", "tiff", "raw", "yuv", "rawl", "tga", "png", "j2k", "jp2", "jpt", "j2c", "jpc" };
+    static const int format[] = { PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, TIF_DFMT, RAW_DFMT, RAW_DFMT, RAWL_DFMT, TGA_DFMT, PNG_DFMT, J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT };
     const char * ext = strrchr(filename, '.');
     if (ext == NULL) {
         return -1;
@@ -461,8 +461,13 @@ char get_next_file(int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
 
     strcpy(image_filename, dirptr->filename[imageno]);
     fprintf(stderr, "File Number %d \"%s\"\n", imageno, image_filename);
-    sprintf(infilename, "%s%s%s", img_fol->imgdirpath, path_separator,
-            image_filename);
+    if (strlen(img_fol->imgdirpath) + strlen(path_separator) + strlen(
+                image_filename) + 1 > sizeof(infilename)) {
+        return 1;
+    }
+    strcpy(infilename, img_fol->imgdirpath);
+    strcat(infilename, path_separator);
+    strcat(infilename, image_filename);
     parameters->decod_format = infile_format(infilename);
     if (parameters->decod_format == -1) {
         return 1;
@@ -479,8 +484,15 @@ char get_next_file(int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
         sprintf(temp1, ".%s", temp_p);
     }
     if (img_fol->set_out_format == 1) {
-        sprintf(outfilename, "%s/%s.%s", img_fol->imgdirpath, temp_ofname,
-                img_fol->out_format);
+        if (strlen(img_fol->imgdirpath) + 1 + strlen(temp_ofname) + 1 + strlen(
+                    img_fol->out_format) + 1 > sizeof(outfilename)) {
+            return 1;
+        }
+        strcpy(outfilename, img_fol->imgdirpath);
+        strcat(outfilename, "/");
+        strcat(outfilename, temp_ofname);
+        strcat(outfilename, ".");
+        strcat(outfilename, img_fol->out_format);
         if (opj_strcpy_s(parameters->outfile, sizeof(parameters->outfile),
                          outfilename) != 0) {
             return 1;
@@ -628,24 +640,17 @@ int parse_cmdline_decoder(int argc, char **argv,
             parameters->cod_format = get_file_format(outfile);
             switch (parameters->cod_format) {
             case PGX_DFMT:
-                break;
             case PXM_DFMT:
-                break;
             case BMP_DFMT:
-                break;
             case TIF_DFMT:
-                break;
             case RAW_DFMT:
-                break;
             case RAWL_DFMT:
-                break;
             case TGA_DFMT:
-                break;
             case PNG_DFMT:
                 break;
             default:
                 fprintf(stderr,
-                        "Unknown output format image %s [only *.png, *.pnm, *.pgm, *.ppm, *.pgx, *.bmp, *.tif, *.raw or *.tga]!!\n",
+                        "Unknown output format image %s [only *.png, *.pnm, *.pgm, *.ppm, *.pgx, *.bmp, *.tif(f), *.raw, *.yuv or *.tga]!!\n",
                         outfile);
                 return 1;
             }
@@ -692,7 +697,7 @@ int parse_cmdline_decoder(int argc, char **argv,
                 break;
             default:
                 fprintf(stderr,
-                        "Unknown output format image %s [only *.png, *.pnm, *.pgm, *.ppm, *.pgx, *.bmp, *.tif, *.raw or *.tga]!!\n",
+                        "Unknown output format image %s [only *.png, *.pnm, *.pgm, *.ppm, *.pgx, *.bmp, *.tif(f), *.raw, *.yuv or *.tga]!!\n",
                         outformat);
                 return 1;
                 break;
@@ -903,7 +908,7 @@ int parse_cmdline_decoder(int argc, char **argv,
             fprintf(stderr,
                     "[ERROR] When -ImgDir is used, -OutFor <FORMAT> must be used.\n");
             fprintf(stderr, "Only one format allowed.\n"
-                    "Valid format are PGM, PPM, PNM, PGX, BMP, TIF, RAW and TGA.\n");
+                    "Valid format are PGM, PPM, PNM, PGX, BMP, TIF, TIFF, RAW, YUV, and TGA.\n");
             return 1;
         }
         if (!((parameters->outfile[0] == 0))) {
@@ -1351,7 +1356,7 @@ int main(int argc, char **argv)
         int it_image;
         num_images = get_num_images(img_fol.imgdirpath);
 
-        dirptr = (dircnt_t*)malloc(sizeof(dircnt_t));
+        dirptr = (dircnt_t*)calloc(1, sizeof(dircnt_t));
         if (!dirptr) {
             destroy_parameters(&parameters);
             return EXIT_FAILURE;
@@ -1705,7 +1710,7 @@ int main(int argc, char **argv)
             }
             break;
 #ifdef OPJ_HAVE_LIBTIFF
-        case TIF_DFMT:          /* TIFF */
+        case TIF_DFMT:          /* TIF(F) */
             if (imagetotif(image, parameters.outfile)) {
                 fprintf(stderr, "[ERROR] Outfile %s not generated\n", parameters.outfile);
                 failed = 1;
@@ -1716,7 +1721,8 @@ int main(int argc, char **argv)
 #endif /* OPJ_HAVE_LIBTIFF */
         case RAW_DFMT:          /* RAW */
             if (imagetoraw(image, parameters.outfile)) {
-                fprintf(stderr, "[ERROR] Error generating raw file. Outfile %s not generated\n",
+                fprintf(stderr,
+                        "[ERROR] Error generating raw or yuv file. Outfile %s not generated\n",
                         parameters.outfile);
                 failed = 1;
             } else if (!(parameters.quiet)) {
@@ -1755,7 +1761,7 @@ int main(int argc, char **argv)
             }
             break;
 #endif /* OPJ_HAVE_LIBPNG */
-        /* Can happen if output file is TIFF or PNG
+        /* Can happen if output file is TIF(F) or PNG
          * and OPJ_HAVE_LIBTIF or OPJ_HAVE_LIBPNG is undefined
         */
         default:
