@@ -40,6 +40,8 @@
 # define SIZE_MAX ((size_t) -1)
 #endif
 
+#ifndef HAVE_MUPDF
+
 static INLINE void *opj_aligned_alloc_n(size_t alignment, size_t size)
 {
     void* ptr;
@@ -247,3 +249,5 @@ void opj_free(void *ptr)
 {
     free(ptr);
 }
+
+#endif // HAVE_MUPDF
