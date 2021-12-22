@@ -1909,13 +1909,13 @@ int main(int argc, char **argv)
     opj_stream_t *l_stream = 00;
     opj_codec_t* l_codec = 00;
     opj_image_t *image = NULL;
-    raw_cparameters_t raw_cp;
+    raw_cparameters_t raw_cp = {};
     OPJ_SIZE_T num_compressed_files = 0;
 
     char indexfilename[OPJ_PATH_LEN];   /* index file name */
 
     unsigned int i, num_images, imageno;
-    img_fol_t img_fol;
+    img_fol_t img_fol = {};
     dircnt_t *dirptr = NULL;
 
     int ret = 0;
@@ -1936,17 +1936,8 @@ int main(int argc, char **argv)
     /* set encoding parameters to default values */
     opj_set_default_encoder_parameters(&parameters);
 
-    /* Initialize indexfilename and img_fol */
+    /* Initialize indexfilename */
     *indexfilename = 0;
-    memset(&img_fol, 0, sizeof(img_fol_t));
-
-    /* raw_cp initialization */
-    raw_cp.rawBitDepth = 0;
-    raw_cp.rawComp = 0;
-    raw_cp.rawComps = 0;
-    raw_cp.rawHeight = 0;
-    raw_cp.rawSigned = 0;
-    raw_cp.rawWidth = 0;
 
     /* parse input and get user encoding parameters */
     parameters.tcp_mct = (char)

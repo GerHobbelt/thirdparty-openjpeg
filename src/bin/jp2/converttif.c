@@ -1262,6 +1262,11 @@ opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters,
     opj_image_t *image = NULL;
     uint16_t tiBps, tiPhoto, tiSf, tiSpp, tiPC;
     uint32_t tiWidth, tiHeight;
+    uint16_t tiResUnit;
+    int tiHasResX;
+    int tiHasResY;
+    float tiResX;
+    float tiResY;
     OPJ_BOOL is_cinema = OPJ_IS_CINEMA(parameters->rsiz);
     convert_XXx32s_C1R cvtTifTo32s = NULL;
     convert_32s_CXPX cvtCxToPx = NULL;
@@ -1286,6 +1291,20 @@ opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters,
     TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &tiSpp);
     TIFFGetField(tif, TIFFTAG_PHOTOMETRIC, &tiPhoto);
     TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &tiPC);
+
+    TIFFGetFieldDefaulted(tif, TIFFTAG_RESOLUTIONUNIT, &tiResUnit);
+    tiHasResX = TIFFGetField(tif, TIFFTAG_XRESOLUTION, &tiResX);
+    tiHasResY = TIFFGetField(tif, TIFFTAG_YRESOLUTION, &tiResY);
+    if (tiHasResX && !tiHasResY) {
+        tiResY = tiResX;
+    } else if (!tiHasResX && tiHasResY) {
+        tiResX = tiResY;
+    }
+    if (tiResUnit == RESUNIT_CENTIMETER) {
+        /* Convert pixels per centimeter to pixels per inch. */
+        tiResX = 2.54f * tiResX;
+        tiResY = 2.54f * tiResY;
+    }
 
     if (tiSpp == 0 || tiSpp > 4) { /* should be 1 ... 4 */
         fprintf(stderr, "tiftoimage: Bad value for samples per pixel == %d.\n"

@@ -134,6 +134,17 @@ static OPJ_BYTE * opj_jp2_write_colr(opj_jp2_t *jp2,
                                      OPJ_UINT32 * p_nb_bytes_written);
 
 /**
+ * Writes the Resolution box.
+ *
+ * @param jp2                   jpeg2000 file codec.
+ * @param p_nb_bytes_written    pointer to store the nb of bytes written by the function.
+ *
+ * @return  the data being copied.
+*/
+static OPJ_BYTE * opj_jp2_write_res(opj_jp2_t *jp2,
+                                    OPJ_UINT32 * p_nb_bytes_written);
+
+/**
  * Writes a FTYP box - File type box
  *
  * @param   cio         the stream to write data to.
@@ -1668,7 +1679,7 @@ static OPJ_BOOL opj_jp2_write_jp2h(opj_jp2_t *jp2,
                                    opj_event_mgr_t * p_manager
                                   )
 {
-    opj_jp2_img_header_writer_handler_t l_writers [4];
+    opj_jp2_img_header_writer_handler_t l_writers [5];
     opj_jp2_img_header_writer_handler_t * l_current_writer;
 
     OPJ_INT32 i, l_nb_pass;
@@ -1699,6 +1710,11 @@ static OPJ_BOOL opj_jp2_write_jp2h(opj_jp2_t *jp2,
 
     if (jp2->color.jp2_cdef != NULL) {
         l_writers[l_nb_pass].handler = opj_jp2_write_cdef;
+        l_nb_pass++;
+    }
+
+    if (0 && jp2->color.jp2_cdef != NULL) {
+        l_writers[l_nb_pass].handler = opj_jp2_write_res;
         l_nb_pass++;
     }
 

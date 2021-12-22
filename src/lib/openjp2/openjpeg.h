@@ -720,6 +720,10 @@ typedef struct opj_image {
     OPJ_UINT32 y1;
     /** number of components in the image */
     OPJ_UINT32 numcomps;
+    /** x resolution in pixels per inch */
+    OPJ_UINT32 xresolution;
+    /** y resolution in pixels per inch */
+    OPJ_UINT32 yresolution;
     /** color space: sRGB, Greyscale or YUV */
     OPJ_COLOR_SPACE color_space;
     /** image components */
