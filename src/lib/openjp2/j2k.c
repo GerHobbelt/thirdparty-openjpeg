@@ -50,7 +50,7 @@
 /*@{*/
 
 /**
- * Sets up the procedures to do on reading header. Developpers wanting to extend the library can add their own reading procedures.
+ * Sets up the procedures to do on reading header. Developers wanting to extend the library can add their own reading procedures.
  */
 static OPJ_BOOL opj_j2k_setup_header_reading(opj_j2k_t *p_j2k,
         opj_event_mgr_t * p_manager);
@@ -89,22 +89,22 @@ static OPJ_BOOL opj_j2k_decoding_validation(opj_j2k_t * p_j2k,
         opj_event_mgr_t * p_manager);
 
 /**
- * Sets up the validation ,i.e. adds the procedures to lauch to make sure the codec parameters
- * are valid. Developpers wanting to extend the library can add their own validation procedures.
+ * Sets up the validation ,i.e. adds the procedures to launch to make sure the codec parameters
+ * are valid. Developers wanting to extend the library can add their own validation procedures.
  */
 static OPJ_BOOL opj_j2k_setup_encoding_validation(opj_j2k_t *p_j2k,
         opj_event_mgr_t * p_manager);
 
 /**
- * Sets up the validation ,i.e. adds the procedures to lauch to make sure the codec parameters
- * are valid. Developpers wanting to extend the library can add their own validation procedures.
+ * Sets up the validation ,i.e. adds the procedures to launch to make sure the codec parameters
+ * are valid. Developers wanting to extend the library can add their own validation procedures.
  */
 static OPJ_BOOL opj_j2k_setup_decoding_validation(opj_j2k_t *p_j2k,
         opj_event_mgr_t * p_manager);
 
 /**
- * Sets up the validation ,i.e. adds the procedures to lauch to make sure the codec parameters
- * are valid. Developpers wanting to extend the library can add their own validation procedures.
+ * Sets up the validation ,i.e. adds the procedures to launch to make sure the codec parameters
+ * are valid. Developers wanting to extend the library can add their own validation procedures.
  */
 static OPJ_BOOL opj_j2k_setup_end_compress(opj_j2k_t *p_j2k,
         opj_event_mgr_t * p_manager);
@@ -147,7 +147,7 @@ static OPJ_BOOL opj_j2k_create_tcd(opj_j2k_t *p_j2k,
                                    opj_event_mgr_t * p_manager);
 
 /**
- * Excutes the given procedures on the given codec.
+ * Executes the given procedures on the given codec.
  *
  * @param       p_procedure_list        the list of procedures to execute
  * @param       p_j2k                           the jpeg2000 codec to execute the procedures on.
@@ -1177,6 +1177,32 @@ static OPJ_BOOL opj_j2k_read_cbd(opj_j2k_t *p_j2k,
                                  OPJ_UINT32 p_header_size,
                                  opj_event_mgr_t * p_manager);
 
+/**
+ * Reads a CAP marker (extended capabilities definition). Empty implementation.
+ * Found in HTJ2K files
+ *
+ * @param       p_header_data   the data contained in the CAP box.
+ * @param       p_j2k                   the jpeg2000 codec.
+ * @param       p_header_size   the size of the data contained in the CAP marker.
+ * @param       p_manager               the user event manager.
+*/
+static OPJ_BOOL opj_j2k_read_cap(opj_j2k_t *p_j2k,
+                                 OPJ_BYTE * p_header_data,
+                                 OPJ_UINT32 p_header_size,
+                                 opj_event_mgr_t * p_manager);
+
+/**
+ * Reads a CPF marker (corresponding profile). Empty implementation. Found in HTJ2K files
+ * @param       p_header_data   the data contained in the CPF box.
+ * @param       p_j2k                   the jpeg2000 codec.
+ * @param       p_header_size   the size of the data contained in the CPF marker.
+ * @param       p_manager               the user event manager.
+*/
+static OPJ_BOOL opj_j2k_read_cpf(opj_j2k_t *p_j2k,
+                                 OPJ_BYTE * p_header_data,
+                                 OPJ_UINT32 p_header_size,
+                                 opj_event_mgr_t * p_manager);
+
 
 /**
  * Writes COC marker for each component.
@@ -1399,10 +1425,12 @@ static const opj_dec_memory_marker_handler_t j2k_memory_marker_handler_tab [] =
     {J2K_MS_COM, J2K_STATE_MH | J2K_STATE_TPH, opj_j2k_read_com},
     {J2K_MS_MCT, J2K_STATE_MH | J2K_STATE_TPH, opj_j2k_read_mct},
     {J2K_MS_CBD, J2K_STATE_MH, opj_j2k_read_cbd},
+    {J2K_MS_CAP, J2K_STATE_MH, opj_j2k_read_cap},
+    {J2K_MS_CPF, J2K_STATE_MH, opj_j2k_read_cpf},
     {J2K_MS_MCC, J2K_STATE_MH | J2K_STATE_TPH, opj_j2k_read_mcc},
     {J2K_MS_MCO, J2K_STATE_MH | J2K_STATE_TPH, opj_j2k_read_mco},
 #ifdef USE_JPWL
-#ifdef TODO_MS /* remove these functions which are not commpatible with the v2 API */
+#ifdef TODO_MS /* remove these functions which are not compatible with the v2 API */
     {J2K_MS_EPC, J2K_STATE_MH | J2K_STATE_TPH, j2k_read_epc},
     {J2K_MS_EPB, J2K_STATE_MH | J2K_STATE_TPH, j2k_read_epb},
     {J2K_MS_ESD, J2K_STATE_MH | J2K_STATE_TPH, j2k_read_esd},
@@ -1762,7 +1790,7 @@ static OPJ_UINT32 opj_j2k_get_num_tp(opj_cp_t *cp, OPJ_UINT32 pino,
                 tpnum *= l_current_poc->layE;
                 break;
             }
-            /* whould we split here ? */
+            /* would we split here ? */
             if (cp->m_specific_param.m_enc.m_tp_flag == prog[i]) {
                 cp->m_specific_param.m_enc.m_tp_pos = i;
                 break;
@@ -6594,6 +6622,60 @@ static OPJ_BOOL opj_j2k_read_cbd(opj_j2k_t *p_j2k,
     return OPJ_TRUE;
 }
 
+/**
+ * Reads a CAP marker (extended capabilities definition). Empty implementation.
+ * Found in HTJ2K files.
+ *
+ * @param       p_header_data   the data contained in the CAP box.
+ * @param       p_j2k                   the jpeg2000 codec.
+ * @param       p_header_size   the size of the data contained in the CAP marker.
+ * @param       p_manager               the user event manager.
+*/
+static OPJ_BOOL opj_j2k_read_cap(opj_j2k_t *p_j2k,
+                                 OPJ_BYTE * p_header_data,
+                                 OPJ_UINT32 p_header_size,
+                                 opj_event_mgr_t * p_manager
+                                )
+{
+    /* preconditions */
+    assert(p_header_data != 00);
+    assert(p_j2k != 00);
+    assert(p_manager != 00);
+
+    (void)p_j2k;
+    (void)p_header_data;
+    (void)p_header_size;
+    (void)p_manager;
+
+    return OPJ_TRUE;
+}
+
+/**
+ * Reads a CPF marker (corresponding profile). Empty implementation. Found in HTJ2K files
+ * @param       p_header_data   the data contained in the CPF box.
+ * @param       p_j2k                   the jpeg2000 codec.
+ * @param       p_header_size   the size of the data contained in the CPF marker.
+ * @param       p_manager               the user event manager.
+*/
+static OPJ_BOOL opj_j2k_read_cpf(opj_j2k_t *p_j2k,
+                                 OPJ_BYTE * p_header_data,
+                                 OPJ_UINT32 p_header_size,
+                                 opj_event_mgr_t * p_manager
+                                )
+{
+    /* preconditions */
+    assert(p_header_data != 00);
+    assert(p_j2k != 00);
+    assert(p_manager != 00);
+
+    (void)p_j2k;
+    (void)p_header_data;
+    (void)p_header_size;
+    (void)p_manager;
+
+    return OPJ_TRUE;
+}
+
 /* ----------------------------------------------------------------------- */
 /* J2K / JPT decoder interface                                             */
 /* ----------------------------------------------------------------------- */
@@ -6893,7 +6975,7 @@ static OPJ_BOOL opj_j2k_is_cinema_compliant(opj_image_t *image, OPJ_UINT16 rsiz,
 
     /* Bitdepth */
     for (i = 0; i < image->numcomps; i++) {
-        if ((image->comps[i].bpp != 12) | (image->comps[i].sgnd)) {
+        if ((image->comps[i].prec != 12) | (image->comps[i].sgnd)) {
             char signed_str[] = "signed";
             char unsigned_str[] = "unsigned";
             char *tmp_str = image->comps[i].sgnd ? signed_str : unsigned_str;
@@ -6902,7 +6984,7 @@ static OPJ_BOOL opj_j2k_is_cinema_compliant(opj_image_t *image, OPJ_UINT16 rsiz,
                           "Precision of each component shall be 12 bits unsigned"
                           "-> At least component %d of input image (%d bits, %s) is not compliant\n"
                           "-> Non-profile-3 codestream will be generated\n",
-                          i, image->comps[i].bpp, tmp_str);
+                          i, image->comps[i].prec, tmp_str);
             return OPJ_FALSE;
         }
     }
@@ -7193,7 +7275,7 @@ static OPJ_BOOL opj_j2k_is_imf_compliant(opj_cparameters_t *parameters,
 
     /* Bitdepth */
     for (i = 0; i < image->numcomps; i++) {
-        if (!(image->comps[i].bpp >= 8 && image->comps[i].bpp <= 16) ||
+        if (!(image->comps[i].prec >= 8 && image->comps[i].prec <= 16) ||
                 (image->comps[i].sgnd)) {
             char signed_str[] = "signed";
             char unsigned_str[] = "unsigned";
@@ -7202,7 +7284,7 @@ static OPJ_BOOL opj_j2k_is_imf_compliant(opj_cparameters_t *parameters,
                           "IMF profiles require precision of each component to b in [8-16] bits unsigned"
                           "-> At least component %d of input image (%d bits, %s) is not compliant\n"
                           "-> Non-IMF codestream will be generated\n",
-                          i, image->comps[i].bpp, tmp_str);
+                          i, image->comps[i].prec, tmp_str);
             ret = OPJ_FALSE;
         }
     }
@@ -7937,7 +8019,7 @@ OPJ_BOOL opj_j2k_setup_encoder(opj_j2k_t *p_j2k,
     }
 #endif /* USE_JPWL */
 
-    /* initialize the mutiple tiles */
+    /* initialize the multiple tiles */
     /* ---------------------------- */
     cp->tcps = (opj_tcp_t*) opj_calloc(cp->tw * cp->th, sizeof(opj_tcp_t));
     if (!cp->tcps) {
@@ -8747,7 +8829,7 @@ static OPJ_BOOL opj_j2k_read_header_procedure(opj_j2k_t *p_j2k,
         if (l_marker_handler->id == J2K_MS_UNK) {
             if (! opj_j2k_read_unk(p_j2k, p_stream, &l_current_marker, p_manager)) {
                 opj_event_msg(p_manager, EVT_ERROR,
-                              "Unknow marker have been detected and generated error.\n");
+                              "Unknown marker has been detected and generated error.\n");
                 return OPJ_FALSE;
             }
 
@@ -9752,7 +9834,7 @@ OPJ_BOOL opj_j2k_decode_tile(opj_j2k_t * p_j2k,
     /* When using the opj_read_tile_header / opj_decode_tile_data API */
     /* such as in test_tile_decoder, m_output_image is NULL, so fall back */
     /* to the full image dimension. This is a bit surprising that */
-    /* opj_set_decode_area() is only used to determinte intersecting tiles, */
+    /* opj_set_decode_area() is only used to determine intersecting tiles, */
     /* but full tile decoding is done */
     l_image_for_bounds = p_j2k->m_output_image ? p_j2k->m_output_image :
                          p_j2k->m_private_image;
@@ -10617,9 +10699,10 @@ static OPJ_BOOL opj_j2k_read_SPCod_SPCoc(opj_j2k_t *p_j2k,
     /* SPcod (G) / SPcoc (D) */
     opj_read_bytes(l_current_ptr, &l_tccp->cblksty, 1);
     ++l_current_ptr;
-    if (l_tccp->cblksty & 0xC0U) { /* 2 msb are reserved, assume we can't read */
+    if ((l_tccp->cblksty & J2K_CCP_CBLKSTY_HTMIXED) != 0) {
+        /* We do not support HT mixed mode yet.  For conformance, it should be supported.*/
         opj_event_msg(p_manager, EVT_ERROR,
-                      "Error reading SPCod SPCoc element, Invalid code-block style found\n");
+                      "Error reading SPCod SPCoc element. Unsupported Mixed HT code-block style found\n");
         return OPJ_FALSE;
     }
 
@@ -11642,7 +11725,7 @@ static OPJ_BOOL opj_j2k_decode_tiles(opj_j2k_t *p_j2k,
 }
 
 /**
- * Sets up the procedures to do on decoding data. Developpers wanting to extend the library can add their own reading procedures.
+ * Sets up the procedures to do on decoding data. Developers wanting to extend the library can add their own reading procedures.
  */
 static OPJ_BOOL opj_j2k_setup_decoding(opj_j2k_t *p_j2k,
                                        opj_event_mgr_t * p_manager)
@@ -11774,7 +11857,7 @@ static OPJ_BOOL opj_j2k_decode_one_tile(opj_j2k_t *p_j2k,
 }
 
 /**
- * Sets up the procedures to do on decoding one tile. Developpers wanting to extend the library can add their own reading procedures.
+ * Sets up the procedures to do on decoding one tile. Developers wanting to extend the library can add their own reading procedures.
  */
 static OPJ_BOOL opj_j2k_setup_decoding_tile(opj_j2k_t *p_j2k,
         opj_event_mgr_t * p_manager)
@@ -12000,7 +12083,7 @@ OPJ_BOOL opj_j2k_get_tile(opj_j2k_t *p_j2k,
         opj_image_destroy(p_j2k->m_output_image);
     }
 
-    /* Create the ouput image from the information previously computed*/
+    /* Create the output image from the information previously computed*/
     p_j2k->m_output_image = opj_image_create0();
     if (!(p_j2k->m_output_image)) {
         return OPJ_FALSE;

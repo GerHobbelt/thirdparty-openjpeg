@@ -76,6 +76,12 @@ Most compilers implement their own version of this keyword ...
 #define OPJ_DEPRECATED(func) func
 #endif
 
+#if defined(__GNUC__) && __GNUC__ >= 6
+#define OPJ_DEPRECATED_STRUCT_MEMBER(memb, msg) __attribute__ ((deprecated(msg))) memb
+#else
+#define OPJ_DEPRECATED_STRUCT_MEMBER(memb, msg) memb
+#endif
+
 #if defined(OPJ_STATIC) || !defined(_WIN32)
 /* http://gcc.gnu.org/wiki/Visibility */
 #   if !defined(_WIN32) && __GNUC__ >= 4
@@ -449,9 +455,9 @@ typedef struct opj_cparameters {
     char infile[OPJ_PATH_LEN];
     /** output file name */
     char outfile[OPJ_PATH_LEN];
-    /** DEPRECATED. Index generation is now handeld with the opj_encode_with_info() function. Set to NULL */
+    /** DEPRECATED. Index generation is now handled with the opj_encode_with_info() function. Set to NULL */
     int index_on;
-    /** DEPRECATED. Index generation is now handeld with the opj_encode_with_info() function. Set to NULL */
+    /** DEPRECATED. Index generation is now handled with the opj_encode_with_info() function. Set to NULL */
     char index[OPJ_PATH_LEN];
     /** subimage encoding: origin image offset in x direction */
     int image_offset_x0;
@@ -681,10 +687,10 @@ typedef struct opj_image_comp {
     OPJ_UINT32 x0;
     /** y component offset compared to the whole image */
     OPJ_UINT32 y0;
-    /** precision */
+    /** precision: number of bits per component per pixel */
     OPJ_UINT32 prec;
-    /** image depth in bits */
-    OPJ_UINT32 bpp;
+    /** obsolete: use prec instead */
+    OPJ_DEPRECATED_STRUCT_MEMBER(OPJ_UINT32 bpp, "Use prec instead");
     /** signed (1) / unsigned (0) */
     OPJ_UINT32 sgnd;
     /** number of decoded resolution */
@@ -738,10 +744,10 @@ typedef struct opj_image_comptparm {
     OPJ_UINT32 x0;
     /** y component offset compared to the whole image */
     OPJ_UINT32 y0;
-    /** precision */
+    /** precision: number of bits per component per pixel */
     OPJ_UINT32 prec;
-    /** image depth in bits */
-    OPJ_UINT32 bpp;
+    /** obsolete: use prec instead */
+    OPJ_DEPRECATED_STRUCT_MEMBER(OPJ_UINT32 bpp, "Use prec instead");
     /** signed (1) / unsigned (0) */
     OPJ_UINT32 sgnd;
 } opj_image_cmptparm_t;
@@ -1447,7 +1453,7 @@ OPJ_API OPJ_BOOL OPJ_CALLCONV opj_decode(opj_codec_t *p_decompressor,
  * Get the decoded tile from the codec
  *
  * @param   p_codec         the jpeg2000 codec.
- * @param   p_stream        input streamm
+ * @param   p_stream        input stream
  * @param   p_image         output image
  * @param   tile_index      index of the tile which will be decode
  *

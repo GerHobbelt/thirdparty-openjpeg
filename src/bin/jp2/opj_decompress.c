@@ -226,7 +226,7 @@ static void decode_help_display(void)
             "    OPTIONAL\n"
             "    Force the precision (bit depth) of components.\n");
     fprintf(stdout,
-            "    There shall be at least 1 value. Theres no limit on the number of values (comma separated, last values ignored if too much values).\n"
+            "    There shall be at least 1 value. There is no limit on the number of values (comma separated, last values ignored if too much values).\n"
             "    If there are less values than components, the last value is used for remaining components.\n"
             "    If 'C' is specified (default), values are clipped.\n"
             "    If 'S' is specified, values are scaled.\n"
@@ -427,8 +427,24 @@ int load_images(dircnt_t *dirptr, char *imgdirpath)
 int get_file_format(const char *filename)
 {
     unsigned int i;
-    static const char *extension[] = {"pgx", "pnm", "pgm", "ppm", "bmp", "tif", "tiff", "raw", "yuv", "rawl", "tga", "png", "j2k", "jp2", "jpt", "j2c", "jpc" };
-    static const int format[] = { PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, TIF_DFMT, RAW_DFMT, RAW_DFMT, RAWL_DFMT, TGA_DFMT, PNG_DFMT, J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT };
+    static const char * const extension[] = {
+        "pgx", "pnm", "pgm", "ppm", "bmp",
+        "tif", "tiff",
+        "raw", "yuv", "rawl",
+        "tga", "png",
+        "j2k", "jp2", "jpt", "j2c", "jpc",
+        "jph", /* HTJ2K with JP2 boxes */
+        "jhc" /* HTJ2K codestream */
+    };
+    static const int format[] = {
+        PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT,
+        TIF_DFMT, TIF_DFMT,
+        RAW_DFMT, RAW_DFMT, RAWL_DFMT,
+        TGA_DFMT, PNG_DFMT,
+        J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT,
+        JP2_CFMT, /* HTJ2K with JP2 boxes */
+        J2K_CFMT /* HTJ2K codestream */
+    };
     const char * ext = strrchr(filename, '.');
     if (ext == NULL) {
         return -1;
@@ -538,10 +554,10 @@ static int infile_format(const char *fname)
 
     if (memcmp(buf, JP2_RFC3745_MAGIC, 12) == 0 || memcmp(buf, JP2_MAGIC, 4) == 0) {
         magic_format = JP2_CFMT;
-        magic_s = ".jp2";
+        magic_s = ".jp2 or .jph";
     } else if (memcmp(buf, J2K_CODESTREAM_MAGIC, 4) == 0) {
         magic_format = J2K_CFMT;
-        magic_s = ".j2k or .jpc or .j2c";
+        magic_s = ".j2k or .jpc or .j2c or .jhc";
     } else {
         return -1;
     }
@@ -786,7 +802,7 @@ int parse_cmdline_decoder(int argc, char **argv,
         break;
 
         /* ----------------------------------------------------- */
-        case 'c': { /* Componenets */
+        case 'c': { /* Components */
             const char* iter = opj_optarg;
             while (1) {
                 parameters->numcomps ++;
@@ -1070,8 +1086,6 @@ static opj_image_t* convert_gray_to_rgb(opj_image_t* original)
         return NULL;
     }
 
-    l_new_components[0].bpp  = l_new_components[1].bpp  = l_new_components[2].bpp  =
-                                   original->comps[0].bpp;
     l_new_components[0].dx   = l_new_components[1].dx   = l_new_components[2].dx   =
                                    original->comps[0].dx;
     l_new_components[0].dy   = l_new_components[1].dy   = l_new_components[2].dy   =
@@ -1090,7 +1104,6 @@ static opj_image_t* convert_gray_to_rgb(opj_image_t* original)
                                    original->comps[0].y0;
 
     for (compno = 1U; compno < original->numcomps; ++compno) {
-        l_new_components[compno + 2U].bpp  = original->comps[compno].bpp;
         l_new_components[compno + 2U].dx   = original->comps[compno].dx;
         l_new_components[compno + 2U].dy   = original->comps[compno].dy;
         l_new_components[compno + 2U].h    = original->comps[compno].h;
@@ -1180,7 +1193,6 @@ static opj_image_t* upsample_image_components(opj_image_t* original)
         opj_image_cmptparm_t* l_new_cmp = &(l_new_components[compno]);
         opj_image_comp_t*     l_org_cmp = &(original->comps[compno]);
 
-        l_new_cmp->bpp  = l_org_cmp->bpp;
         l_new_cmp->prec = l_org_cmp->prec;
         l_new_cmp->sgnd = l_org_cmp->sgnd;
         l_new_cmp->x0   = original->x0;

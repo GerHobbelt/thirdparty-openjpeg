@@ -120,7 +120,7 @@ static opj_image_t * pngtoimage_internal(opj_cparameters_t * params,
         if (png_get_valid(png, info, PNG_INFO_tRNS)) {
             png_set_expand(png);
         }
-        /* We might wan't to expand background */
+        /* We might want to expand background */
         /*
         if(png_get_valid(png, info, PNG_INFO_bKGD)) {
             png_color_16p bgnd;
@@ -193,9 +193,8 @@ static opj_image_t * pngtoimage_internal(opj_cparameters_t * params,
         /* Create image */
         memset(cmptparm, 0, sizeof(cmptparm));
         for (i = 0; i < nr_comp; ++i) {
-            cmptparm[i].prec = (OPJ_UINT32)bit_depth;
             /* bits_per_pixel: 8 or 16 */
-            cmptparm[i].bpp = (OPJ_UINT32)bit_depth;
+            cmptparm[i].prec = (OPJ_UINT32)bit_depth;
             cmptparm[i].sgnd = 0;
             cmptparm[i].dx = (OPJ_UINT32)params->subsampling_dx;
             cmptparm[i].dy = (OPJ_UINT32)params->subsampling_dy;
