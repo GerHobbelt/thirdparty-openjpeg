@@ -44,6 +44,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include <limits.h>
 
 #ifdef _WIN32
 #include "windirent.h"
@@ -485,6 +486,11 @@ static unsigned int get_num_images(char *imgdirpath)
         if (strcmp(".", content->d_name) == 0 || strcmp("..", content->d_name) == 0) {
             continue;
         }
+        if (num_images == UINT_MAX) {
+            fprintf(stderr, "Too many files in folder %s\n", imgdirpath);
+            num_images = 0;
+            break;
+        }
         num_images++;
     }
     closedir(dir);
@@ -547,7 +553,8 @@ static char * get_file_name(char *name)
     return fname;
 }
 
-static char get_next_file(int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
+static char get_next_file(unsigned int imageno, dircnt_t *dirptr,
+                          img_fol_t *img_fol,
                           opj_cparameters_t *parameters)
 {
     char image_filename[OPJ_PATH_LEN], infilename[OPJ_PATH_LEN],
@@ -555,7 +562,7 @@ static char get_next_file(int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
     char *temp_p, temp1[OPJ_PATH_LEN] = "";
 
     strcpy(image_filename, dirptr->filename[imageno]);
-    fprintf(stderr, "File Number %d \"%s\"\n", imageno, image_filename);
+    fprintf(stderr, "File Number %u \"%s\"\n", imageno, image_filename);
     parameters->decod_format = get_file_format(image_filename);
     if (parameters->decod_format == -1) {
         return 1;
@@ -1952,6 +1959,11 @@ int main(int argc, char **argv)
     /* Read directory if necessary */
     if (img_fol.set_imgdir == 1) {
         num_images = get_num_images(img_fol.imgdirpath);
+        if (num_images == 0) {
+            fprintf(stdout, "Folder is empty\n");
+            ret = 0;
+            goto fin;
+        }
         dirptr = (dircnt_t*)malloc(sizeof(dircnt_t));
         if (dirptr) {
             dirptr->filename_buf = (char*)calloc(num_images, OPJ_PATH_LEN * sizeof(
@@ -1962,18 +1974,14 @@ int main(int argc, char **argv)
                 goto fin;
             }
             for (i = 0; i < num_images; i++) {
-                dirptr->filename[i] = dirptr->filename_buf + i * OPJ_PATH_LEN;
+                dirptr->filename[i] = dirptr->filename_buf + (size_t)i * OPJ_PATH_LEN;
             }
         }
         if (load_images(dirptr, img_fol.imgdirpath) == 1) {
             ret = 0;
             goto fin;
         }
-        if (num_images == 0) {
-            fprintf(stdout, "Folder is empty\n");
-            ret = 0;
-            goto fin;
-        }
+
     } else {
         num_images = 1;
     }
@@ -1983,7 +1991,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "\n");
 
         if (img_fol.set_imgdir == 1) {
-            if (get_next_file((int)imageno, dirptr, &img_fol, &parameters)) {
+            if (get_next_file(imageno, dirptr, &img_fol, &parameters)) {
                 fprintf(stderr, "skipping file...\n");
                 continue;
             }
@@ -2238,7 +2246,7 @@ int main(int argc, char **argv)
             }
             for (i = 0; i < l_nb_tiles; ++i) {
                 if (! opj_write_tile(l_codec, i, l_data, l_data_size, l_stream)) {
-                    fprintf(stderr, "ERROR -> test_tile_encoder: failed to write the tile %d!\n",
+                    fprintf(stderr, "ERROR -> test_tile_encoder: failed to write the tile %u!\n",
                             i);
                     opj_stream_destroy(l_stream);
                     opj_destroy_codec(l_codec);
