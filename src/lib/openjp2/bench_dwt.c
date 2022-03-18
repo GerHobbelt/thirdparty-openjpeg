@@ -39,12 +39,12 @@
 #include <sys/times.h>
 #endif /* _WIN32 */
 
-OPJ_INT32 getValue(OPJ_UINT32 i)
+static OPJ_INT32 getValue(OPJ_UINT32 i)
 {
     return ((OPJ_INT32)i % 511) - 256;
 }
 
-void init_tilec(opj_tcd_tilecomp_t * l_tilec,
+static void init_tilec(opj_tcd_tilecomp_t * l_tilec,
                 OPJ_INT32 x0,
                 OPJ_INT32 y0,
                 OPJ_INT32 x1,
@@ -97,13 +97,13 @@ void init_tilec(opj_tcd_tilecomp_t * l_tilec,
     }
 }
 
-void free_tilec(opj_tcd_tilecomp_t * l_tilec)
+static void free_tilec(opj_tcd_tilecomp_t * l_tilec)
 {
     opj_free(l_tilec->data);
     opj_free(l_tilec->resolutions);
 }
 
-void usage(void)
+static void usage(void)
 {
     printf(
         "bench_dwt [-decode|encode] [-I] [-size value] [-check] [-display]\n");
@@ -112,6 +112,8 @@ void usage(void)
     exit(1);
 }
 
+
+#if !defined(BUILD_MONOLITHIC)  // opj_clock is redefined in opj_clock.c
 
 OPJ_FLOAT64 opj_clock(void)
 {
@@ -139,6 +141,8 @@ OPJ_FLOAT64 opj_clock(void)
 #endif
 }
 
+#endif  // BUILD_MONOLITHIC
+
 static OPJ_FLOAT64 opj_wallclock(void)
 {
 #ifdef _WIN32
@@ -150,9 +154,14 @@ static OPJ_FLOAT64 opj_wallclock(void)
 #endif
 }
 
-int main(int argc, char** argv)
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)      opj_bench_dwt_main(cnt, arr)
+#endif
+
+int main(int argc, const char** argv)
 {
-    int num_threads = 0;
+	int num_threads = 0;
     opj_tcd_t tcd;
     opj_tcd_image_t tcd_image;
     opj_tcd_tile_t tcd_tile;

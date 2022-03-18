@@ -94,7 +94,7 @@ box_param_t * gene_boxbyOffset(int fd, OPJ_OFF_T offset)
     /* read LBox and TBox*/
     if (!(data = fetch_bytes(fd, offset, 8))) {
         fprintf(FCGI_stderr, "Error: error in gene_boxbyOffset( %d, %" PRId64 ")\n", fd,
-                offset);
+			(OPJ_INT64)offset);
         return NULL;
     }
 
@@ -119,7 +119,7 @@ box_param_t * gene_boxbyOffset(int fd, OPJ_OFF_T offset)
             free(data2);
         } else {
             fprintf(FCGI_stderr, "Error: error in gene_boxbyOffset( %d, %" PRId64 ")\n", fd,
-                    offset);
+				(OPJ_INT64)offset);
             free(data);
             return NULL;
         }
@@ -210,7 +210,7 @@ box_param_t * gene_boxbyType(int fd, OPJ_OFF_T offset, OPJ_SIZE_T length,
                     free(data2);
                 } else {
                     fprintf(FCGI_stderr, "Error: error in gene_boxbyType( %d, %" PRId64 ", %" PRId64
-                            ", %s)\n", fd, offset, length, TBox);
+                            ", %s)\n", fd, (OPJ_INT64)offset, (OPJ_INT64)length, TBox);
                     free(data);
                     return NULL;
                 }
@@ -229,7 +229,7 @@ box_param_t * gene_boxbyType(int fd, OPJ_OFF_T offset, OPJ_SIZE_T length,
             free(data);
         } else {
             fprintf(FCGI_stderr, "Error: error in gene_boxbyType( %d, %" PRId64 ", %" PRId64
-                    ", %s)\n", fd, offset, length, TBox);
+                    ", %s)\n", fd, (OPJ_INT64)offset, (OPJ_INT64)length, TBox);
             return NULL;
         }
         assert(((Byte8_t)pos + boxlen) >= (Byte8_t)pos);
@@ -296,7 +296,7 @@ box_param_t * gene_childboxbyType(box_param_t *superbox, OPJ_OFF_T offset,
     OPJ_SIZE_T DBOXlen = get_DBoxlen(superbox);
     assert(offset >= 0);
     if (DBOXlen < (OPJ_SIZE_T)offset) {
-        fprintf(FCGI_stderr, "Error: Impossible happen %lu < %ld\n", DBOXlen, offset);
+        fprintf(FCGI_stderr, "Error: Impossible happen %" PRId64 " < %" PRId64 "\n", (OPJ_INT64)DBOXlen, (OPJ_INT64)offset);
         return NULL;
     }
     return gene_boxbyType(superbox->fd, get_DBoxoff(superbox) + offset,

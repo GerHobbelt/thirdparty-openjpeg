@@ -208,9 +208,14 @@ static void dump_array16(int array[], int size)
     printf("0x%04x\n};\n\n", array[size]);
 }
 
-int main(int argc, char **argv)
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)      opj_generate_t1_luts_main(cnt, arr)
+#endif
+
+int main(int argc, const char** argv)
 {
-    unsigned int i, j;
+	unsigned int i, j;
     double u, v, t;
 
     int lut_ctxno_zc[2048];
