@@ -116,7 +116,7 @@ Byte_t * receive_JPIPstream(SOCKET connected_socket, char **target, char **tid,
         return NULL;
     }
     datalen = (OPJ_SIZE_T)idatalen;
-    fprintf(stdout, "Receive Data: %lu Bytes\n", datalen);
+    fprintf(stdout, "Receive Data: %zu Bytes\n", (size_t)datalen);
 
     jpipstream = receive_stream(connected_socket, datalen);
 
