@@ -4981,15 +4981,15 @@ static OPJ_BOOL opj_j2k_read_sod(opj_j2k_t *p_j2k,
         /* Check enough bytes left in stream before allocation */
         if ((OPJ_OFF_T)p_j2k->m_specific_param.m_decoder.m_sot_length >
                 opj_stream_get_number_byte_left(p_stream)) {
-#ifdef TILE_ERRORS_ARE_FATAL
-            opj_event_msg(p_manager, EVT_ERROR,
-                          "Tile part length size inconsistent with stream length\n");
-            return OPJ_FALSE;
-#else
-            opj_event_msg(p_manager, EVT_WARNING,
-                          "Tile part length size inconsistent with stream length\n");
-            truncated = OPJ_TRUE;
-#endif
+            if (p_j2k->m_cp.strict) {
+                opj_event_msg(p_manager, EVT_ERROR,
+                              "Tile part length size inconsistent with stream length\n");
+                return OPJ_FALSE;
+            } else {
+                opj_event_msg(p_manager, EVT_WARNING,
+                              "Tile part length size inconsistent with stream length\n");
+                truncated = OPJ_TRUE;
+            }
         }
         if (p_j2k->m_specific_param.m_decoder.m_sot_length >
                 UINT_MAX - OPJ_COMMON_CBLK_DATA_EXTRA) {
@@ -6720,6 +6720,13 @@ void opj_j2k_setup_decoder(opj_j2k_t *j2k, opj_dparameters_t *parameters)
         j2k->m_cp.exp_comps = parameters->jpwl_exp_comps;
         j2k->m_cp.max_tiles = parameters->jpwl_max_tiles;
 #endif /* USE_JPWL */
+    }
+}
+
+void opj_j2k_decoder_set_strict_mode(opj_j2k_t *j2k, OPJ_BOOL strict)
+{
+    if (j2k) {
+        j2k->m_cp.strict = strict;
     }
 }
 
@@ -9917,10 +9924,10 @@ OPJ_BOOL opj_j2k_decode_tile(opj_j2k_t * p_j2k,
 
     if (p_j2k->m_specific_param.m_decoder.m_state != J2K_STATE_EOC) {
         if (opj_stream_read_data(p_stream, l_data, 2, p_manager) != 2) {
-            opj_event_msg(p_manager, EVT_ERROR, "Stream too short\n");
-            return OPJ_FALSE;
+            opj_event_msg(p_manager, p_j2k->m_cp.strict ? EVT_ERROR : EVT_WARNING,
+                          "Stream too short\n");
+            return p_j2k->m_cp.strict ? OPJ_FALSE : OPJ_TRUE;
         }
-
         opj_read_bytes(l_data, &l_current_marker, 2);
 
         if (l_current_marker == J2K_MS_EOC) {
@@ -10436,6 +10443,9 @@ opj_j2k_t* opj_j2k_create_decompress(void)
     /* in the absence of JP2 boxes, consider different bit depth / sign */
     /* per component is allowed */
     l_j2k->m_cp.allow_different_bit_depth_sign = 1;
+
+    /* Default to using strict mode. */
+    l_j2k->m_cp.strict = OPJ_TRUE;
 
 #ifdef OPJ_DISABLE_TPSOT_FIX
     l_j2k->m_specific_param.m_decoder.m_nb_tile_parts_correction_checked = 1;
