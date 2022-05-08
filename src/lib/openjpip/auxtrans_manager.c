@@ -132,7 +132,7 @@ void send_responsedata_on_aux(OPJ_BOOL istcp, auxtrans_param_t auxtrans,
                            0, &threadId);
         if (auxresponse->hTh == 0) {
             fprintf(FCGI_stderr, "ERROR: pthread_create() %s",
-                    strerror((int)auxresponse->hTh));
+                    strerror((int)(intptr_t)auxresponse->hTh));
         }
 #else
         status = pthread_create(&thread, NULL, &aux_streaming, auxresponse);
