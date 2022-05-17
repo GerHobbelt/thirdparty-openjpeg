@@ -96,7 +96,7 @@ SOCKET open_listeningsocket(uint16_t port)
 SOCKET accept_socket(SOCKET listening_socket)
 {
     struct sockaddr_in peer_sin;
-    unsigned int addrlen = sizeof(peer_sin);
+    int addrlen = (int)sizeof(peer_sin);
 
     return accept(listening_socket, (struct sockaddr *)&peer_sin, &addrlen);
 }
