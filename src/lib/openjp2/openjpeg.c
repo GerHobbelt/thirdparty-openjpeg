@@ -87,6 +87,148 @@ OPJ_BOOL OPJ_CALLCONV opj_set_error_handler(opj_codec_t * p_codec,
 }
 
 /* ---------------------------------------------------------------------- */
+/* Buffer-based */
+
+static OPJ_SIZE_T
+opj_read_from_buffer(void *pdst, OPJ_SIZE_T dstlen,
+                     opj_buffer_info_t *p_user_data)
+{
+    OPJ_SIZE_T n;
+    OPJ_BYTE *psrc, *pend;
+
+    psrc = p_user_data->cur;
+    pend = p_user_data->buf + p_user_data->cap;
+    assert(pend >= psrc);
+
+    n = (OPJ_SIZE_T)(pend - psrc);
+    if (0 == n)
+        return (OPJ_SIZE_T) - 1;
+
+    if (n > dstlen)
+        n = dstlen;
+
+    memcpy(pdst, psrc, n);
+    p_user_data->cur += n;
+
+    return n;
+}
+
+static OPJ_SIZE_T
+opj_write_to_buffer(void* psrc, OPJ_SIZE_T srclen,
+                    opj_buffer_info_t* p_user_data)
+{
+    OPJ_SIZE_T n, cap, datalen;
+    void *pbuf, *pcur;
+
+    pbuf = p_user_data->buf;
+    pcur = p_user_data->cur;
+
+    assert(pcur >= pbuf);
+
+    cap = p_user_data->cap;
+    if (0 == cap) {
+        cap = 1;
+    }
+
+    datalen = (OPJ_SIZE_T)(pcur - pbuf);
+    assert(datalen <= cap);
+
+    for (n = cap - datalen; n < srclen; cap *= 2, n = cap - datalen) ;
+
+    if (cap != p_user_data->cap) {
+        pbuf = opj_malloc(cap);
+        if (0 == pbuf)
+            return (OPJ_SIZE_T) - 1;
+
+        if (p_user_data->buf) {
+            memcpy(pbuf, p_user_data->buf, datalen);
+            opj_free(p_user_data->buf);
+        }
+
+        p_user_data->buf = pbuf;
+        p_user_data->cur = pbuf + datalen;
+        p_user_data->cap = cap;
+    }
+
+    memcpy(p_user_data->cur, psrc, srclen);
+    p_user_data->cur += srclen;
+
+    return srclen;
+}
+
+static OPJ_OFF_T
+opj_skip_from_buffer(OPJ_OFF_T off, opj_buffer_info_t* p_user_data)
+{
+    OPJ_OFF_T cur;
+
+    cur = p_user_data->cur - p_user_data->buf;
+    off = cur + off;
+
+    if (0 > off)
+        return -1;
+
+    if ((OPJ_SIZE_T)off > p_user_data->cap) {
+        /* Do not allow moving past the end of the current buffer, unlike
+         * UNIX {f,l}seek.
+         */
+        off = (OPJ_OFF_T)p_user_data->cap;
+    }
+
+    p_user_data->cur = p_user_data->buf + off;
+
+    return off - cur;
+}
+
+static OPJ_BOOL
+opj_seek_from_buffer(OPJ_OFF_T off, opj_buffer_info_t* p_user_data)
+{
+    if (0 > off)
+        return OPJ_FALSE;
+
+    if ((OPJ_SIZE_T)off > p_user_data->cap) {
+        /* Do not allow moving past the end of the current buffer, unlike
+         * UNIX {f,l}seek.
+         */
+        off = (OPJ_OFF_T)p_user_data->cap;
+    }
+
+    p_user_data->cur = p_user_data->buf + off;
+
+    return OPJ_TRUE;
+}
+
+opj_stream_t* OPJ_CALLCONV
+opj_stream_create_buffer_stream(opj_buffer_info_t* p_user_data, OPJ_BOOL input)
+{
+    opj_stream_t* pstream;
+
+    if (0 == p_user_data)
+        return 0;
+
+    pstream = opj_stream_default_create(input);
+    if (0 == pstream)
+        return 0;
+
+    opj_stream_set_user_data(pstream, p_user_data, 0);
+    opj_stream_set_user_data_length(pstream, p_user_data->cap);
+
+    if (input)
+        opj_stream_set_read_function(
+            pstream, (opj_stream_read_fn)opj_read_from_buffer);
+    else
+        opj_stream_set_write_function(
+            pstream, (opj_stream_write_fn)opj_write_to_buffer);
+
+    opj_stream_set_skip_function(
+        pstream, (opj_stream_skip_fn)opj_skip_from_buffer);
+
+    opj_stream_set_seek_function(
+        pstream, (opj_stream_seek_fn)opj_seek_from_buffer);
+
+    return pstream;
+}
+
+/* ---------------------------------------------------------------------- */
 
 static OPJ_SIZE_T opj_read_from_file(void * p_buffer, OPJ_SIZE_T p_nb_bytes,
                                      void * p_user_data)
