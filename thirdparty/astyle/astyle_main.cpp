@@ -652,7 +652,7 @@ void ASConsole::formatFile(const string& fileName_)
 
 // build a vector of argv options
 // the program path argv[0] is excluded
-vector<string> ASConsole::getArgvOptions(int argc, char** argv) const
+vector<string> ASConsole::getArgvOptions(int argc, const char** argv) const
 {
 	vector<string> argvOptions;
 	for (int i = 1; i < argc; i++)
@@ -3966,7 +3966,11 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion(void)
 // main function for ASConsole build
 //----------------------------------------------------------------------------
 
-int main(int argc, char** argv)
+#if defined(BUILD_MONOLITHIC)
+#define main		jpg_astyle_main
+#endif
+
+int main(int argc, const char** argv)
 {
 	// create objects
 	ASFormatter formatter;

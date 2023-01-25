@@ -287,7 +287,7 @@ public:     // functions
 	void error() const;
 	void error(const char* why, const char* what) const;
 	void formatCinToCout();
-	vector<string> getArgvOptions(int argc, char** argv) const;
+	vector<string> getArgvOptions(int argc, const char** argv) const;
 	bool fileNameVectorIsEmpty() const;
 	ostream* getErrorStream() const;
 	bool getFilesAreIdentical() const;

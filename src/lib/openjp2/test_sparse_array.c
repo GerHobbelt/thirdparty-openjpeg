@@ -33,7 +33,12 @@
 
 #include "opj_includes.h"
 
-int main()
+
+#if defined(BUILD_MONOLITHIC)
+#define main		jp2_test_sparse_array_main
+#endif
+
+int main(void)
 {
     OPJ_UINT32 i, j, w, h;
     OPJ_INT32 buffer[ 99 * 101 ];
