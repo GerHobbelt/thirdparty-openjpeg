@@ -2139,7 +2139,7 @@ int main(int argc, char **argv)
                 double msamplespersec;
                 if (image->numcomps == 3 &&
                         image->comps[1].dx == 2 &&
-                        image->comps[1].dy == 2) {
+                        image->comps[2].dx == 2) {
                     avgcomponents = 2;
                 }
                 msamplespersec = (double)image->x1 * image->y1 * avgcomponents * framerate /
