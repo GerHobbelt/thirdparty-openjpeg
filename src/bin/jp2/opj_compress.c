@@ -1269,6 +1269,7 @@ static int parse_cmdline_encoder(int argc, char **argv,
                 };
                 parameters->max_cs_size = limitMBitsSec[sublevel] * (1000 * 1000 / 8) /
                                           framerate;
+                parameters->max_comp_size = parameters->max_cs_size;
                 fprintf(stdout, "Setting max codestream size to %d bytes.\n",
                         parameters->max_cs_size);
             }
