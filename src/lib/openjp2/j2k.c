@@ -5082,6 +5082,11 @@ static OPJ_BOOL opj_j2k_read_sod(opj_j2k_t *p_j2k,
     }
 
     if (l_current_read_size != p_j2k->m_specific_param.m_decoder.m_sot_length || truncated == OPJ_TRUE) {
+        if (l_current_read_size == (OPJ_SIZE_T)(-1)) {
+            /* Avoid issue of https://github.com/uclouvain/openjpeg/issues/1533 */
+            opj_event_msg(p_manager, EVT_ERROR, "Stream too short\n");
+            return OPJ_FALSE;
+        }
         p_j2k->m_specific_param.m_decoder.m_state = J2K_STATE_NEOC;
     } else {
         p_j2k->m_specific_param.m_decoder.m_state = J2K_STATE_TPHSOT;
@@ -9639,6 +9644,11 @@ OPJ_BOOL opj_j2k_read_tile_header(opj_j2k_t * p_j2k,
 
             /* Why this condition? FIXME */
             if (p_j2k->m_specific_param.m_decoder.m_state & J2K_STATE_TPH) {
+                if (p_j2k->m_specific_param.m_decoder.m_sot_length < l_marker_size + 2) {
+                    opj_event_msg(p_manager, EVT_ERROR,
+                                  "Sot length is less than marker size + marker ID\n");
+                    return OPJ_FALSE;
+                }
                 p_j2k->m_specific_param.m_decoder.m_sot_length -= (l_marker_size + 2);
             }
             l_marker_size -= 2; /* Subtract the size of the marker ID already read */
@@ -11726,8 +11736,9 @@ static OPJ_BOOL opj_j2k_decode_tiles(opj_j2k_t *p_j2k,
             return OPJ_FALSE;
         }
 
-        if (! opj_j2k_decode_tile(p_j2k, l_current_tile_no, NULL, 0,
-                                  p_stream, p_manager)) {
+        if (!l_go_on ||
+                ! opj_j2k_decode_tile(p_j2k, l_current_tile_no, NULL, 0,
+                                      p_stream, p_manager)) {
             opj_event_msg(p_manager, EVT_ERROR, "Failed to decode tile 1/1\n");
             return OPJ_FALSE;
         }
