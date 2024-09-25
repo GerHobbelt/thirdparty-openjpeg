@@ -462,7 +462,7 @@ void color_sycc_to_rgb(opj_image_t *img)
 #endif /* OPJ_HAVE_LIBLCMS1 */
 
 /*#define DEBUG_PROFILE*/
-void color_apply_icc_profile(opj_image_t *image)
+static void color_apply_icc_profile_lcms(cmsContext ContextID, opj_image_t *image)
 {
     cmsHPROFILE in_prof, out_prof;
     cmsHTRANSFORM transform;
@@ -473,7 +473,7 @@ void color_apply_icc_profile(opj_image_t *image)
     int prec, ok = 0;
     OPJ_COLOR_SPACE new_space;
 
-    in_prof = cmsOpenProfileFromMem(image->icc_profile_buf, image->icc_profile_len);
+    in_prof = cmsOpenProfileFromMem(ContextID, image->icc_profile_buf, image->icc_profile_len);
 #ifdef DEBUG_PROFILE
     FILE *icm = fopen("debug.icm", "wb");
     fwrite(image->icc_profile_buf, 1, image->icc_profile_len, icm);
@@ -481,12 +481,12 @@ void color_apply_icc_profile(opj_image_t *image)
 #endif
 
     if (in_prof == NULL) {
-        return;
+			return;
     }
 
-    in_space = cmsGetPCS(in_prof);
-    out_space = cmsGetColorSpace(in_prof);
-    intent = cmsGetHeaderRenderingIntent(in_prof);
+    in_space = cmsGetPCS(ContextID, in_prof);
+    out_space = cmsGetColorSpace(ContextID, in_prof);
+    intent = cmsGetHeaderRenderingIntent(ContextID, in_prof);
 
 
     max_w = image->comps[0].w;
@@ -497,7 +497,7 @@ void color_apply_icc_profile(opj_image_t *image)
         unsigned int i, nr_comp = image->numcomps;
 
         if (nr_comp < 3) { /* GRAY or GRAYA, not RGB or RGBA */
-            cmsCloseProfile(in_prof);
+            cmsCloseProfile(ContextID, in_prof);
             return;
         }
         if (nr_comp > 4) {
@@ -522,7 +522,7 @@ void color_apply_icc_profile(opj_image_t *image)
 
         }
         if (i != nr_comp) {
-            cmsCloseProfile(in_prof);
+            cmsCloseProfile(ContextID, in_prof);
             return;
         }
 
@@ -533,21 +533,21 @@ void color_apply_icc_profile(opj_image_t *image)
             in_type = TYPE_RGB_16;
             out_type = TYPE_RGB_16;
         }
-        out_prof = cmsCreate_sRGBProfile();
+        out_prof = cmsCreate_sRGBProfile(ContextID);
         new_space = OPJ_CLRSPC_SRGB;
     } else if (out_space == cmsSigGrayData) { /* enumCS 17 */
         in_type = TYPE_GRAY_8;
         out_type = TYPE_RGB_8;
-        out_prof = cmsCreate_sRGBProfile();
+        out_prof = cmsCreate_sRGBProfile(ContextID);
         new_space = OPJ_CLRSPC_SRGB;
     } else if (out_space == cmsSigYCbCrData) { /* enumCS 18 */
         if (image->numcomps < 3) {
-            cmsCloseProfile(in_prof);
+            cmsCloseProfile(ContextID, in_prof);
             return;
         }
         in_type = TYPE_YCbCr_16;
         out_type = TYPE_RGB_16;
-        out_prof = cmsCreate_sRGBProfile();
+        out_prof = cmsCreate_sRGBProfile(ContextID);
         new_space = OPJ_CLRSPC_SRGB;
     } else {
 #ifdef DEBUG_PROFILE
@@ -557,12 +557,12 @@ void color_apply_icc_profile(opj_image_t *image)
                 (out_space >> 24) & 0xff, (out_space >> 16) & 0xff,
                 (out_space >> 8) & 0xff, out_space & 0xff);
 #endif
-        cmsCloseProfile(in_prof);
+        cmsCloseProfile(ContextID, in_prof);
 
         return;
     }
     if (out_prof == NULL) {
-        cmsCloseProfile(in_prof);
+        cmsCloseProfile(ContextID, in_prof);
         return;
     }
 
@@ -591,12 +591,12 @@ void color_apply_icc_profile(opj_image_t *image)
     (void)in_space;
 #endif /* DEBUG_PROFILE */
 
-    transform = cmsCreateTransform(in_prof, in_type, out_prof, out_type, intent, 0);
+    transform = cmsCreateTransform(ContextID, in_prof, in_type, out_prof, out_type, intent, 0);
 
 #ifdef OPJ_HAVE_LIBLCMS2
     /* Possible for: LCMS_VERSION >= 2000 :*/
-    cmsCloseProfile(in_prof);
-    cmsCloseProfile(out_prof);
+    cmsCloseProfile(ContextID, in_prof);
+    cmsCloseProfile(ContextID, out_prof);
 #endif
 
     if (transform == NULL) {
@@ -639,7 +639,7 @@ void color_apply_icc_profile(opj_image_t *image)
                     *in++ = (unsigned char) * b++;
                 }
 
-                cmsDoTransform(transform, inbuf, outbuf, (cmsUInt32Number)max);
+                cmsDoTransform(ContextID, transform, inbuf, outbuf, (cmsUInt32Number)max);
 
                 r = image->comps[0].data;
                 g = image->comps[1].data;
@@ -677,7 +677,7 @@ fails0:
                     *in++ = (unsigned short) * b++;
                 }
 
-                cmsDoTransform(transform, inbuf, outbuf, (cmsUInt32Number)max);
+                cmsDoTransform(ContextID, transform, inbuf, outbuf, (cmsUInt32Number)max);
 
                 r = image->comps[0].data;
                 g = image->comps[1].data;
@@ -697,7 +697,7 @@ fails1:
         } else {
             fprintf(stderr,
                     "[ERROR] Image components should have the same width and height\n");
-            cmsDeleteTransform(transform);
+            cmsDeleteTransform(ContextID, transform);
             return;
         }
     } else { /* image->numcomps <= 2 : GRAY, GRAYA */
@@ -742,7 +742,7 @@ fails1:
             for (i = 0U; i < max; ++i) {
                 *in++ = (unsigned char) * r++;
             }
-            cmsDoTransform(transform, inbuf, outbuf, (cmsUInt32Number)max);
+            cmsDoTransform(ContextID, transform, inbuf, outbuf, (cmsUInt32Number)max);
 
             r = image->comps[0].data;
             g = image->comps[1].data;
@@ -802,7 +802,7 @@ fails2:
             for (i = 0U; i < max; ++i) {
                 *in++ = (unsigned short) * r++;
             }
-            cmsDoTransform(transform, inbuf, outbuf, (cmsUInt32Number)max);
+            cmsDoTransform(ContextID, transform, inbuf, outbuf, (cmsUInt32Number)max);
 
             r = image->comps[0].data;
             g = image->comps[1].data;
@@ -824,7 +824,7 @@ fails3:
         }
     }/* if(image->numcomps > 2) */
 
-    cmsDeleteTransform(transform);
+    cmsDeleteTransform(ContextID, transform);
 
 #ifdef OPJ_HAVE_LIBLCMS1
     cmsCloseProfile(in_prof);
@@ -834,6 +834,13 @@ fails3:
         image->color_space = new_space;
     }
 }/* color_apply_icc_profile() */
+
+void color_apply_icc_profile(opj_image_t* image)
+{
+	cmsContext c1 = cmsCreateContext(NULL, NULL);
+	color_apply_icc_profile_lcms(c1, image);
+	cmsDeleteContext(c1);
+}
 
 static int are_comps_same_dimensions(opj_image_t * image)
 {
@@ -847,7 +854,7 @@ static int are_comps_same_dimensions(opj_image_t * image)
     return OPJ_TRUE;
 }
 
-void color_cielab_to_rgb(opj_image_t *image)
+static void color_cielab_to_rgb_lcms(cmsContext ContextID, opj_image_t *image)
 {
     int *row;
     int enumcs, numcomps;
@@ -882,21 +889,21 @@ void color_cielab_to_rgb(opj_image_t *image)
         cmsUInt16Number RGB[3];
         cmsCIELab Lab;
 
-        in = cmsCreateLab4Profile(NULL);
+        in = cmsCreateLab4Profile(ContextID, NULL);
         if (in == NULL) {
             return;
         }
-        out = cmsCreate_sRGBProfile();
+        out = cmsCreate_sRGBProfile(ContextID);
         if (out == NULL) {
-            cmsCloseProfile(in);
+            cmsCloseProfile(ContextID, in);
             return;
         }
-        transform = cmsCreateTransform(in, TYPE_Lab_DBL, out, TYPE_RGB_16,
+        transform = cmsCreateTransform(ContextID, in, TYPE_Lab_DBL, out, TYPE_RGB_16,
                                        INTENT_PERCEPTUAL, 0);
 
 #ifdef OPJ_HAVE_LIBLCMS2
-        cmsCloseProfile(in);
-        cmsCloseProfile(out);
+        cmsCloseProfile(ContextID, in);
+        cmsCloseProfile(ContextID, out);
 #endif
         if (transform == NULL) {
 #ifdef OPJ_HAVE_LIBLCMS1
@@ -960,13 +967,13 @@ void color_cielab_to_rgb(opj_image_t *image)
             Lab.b = minb + (double)(*b) * (maxb - minb) / (pow(2, prec2) - 1);
             ++b;
 
-            cmsDoTransform(transform, &Lab, RGB, 1);
+            cmsDoTransform(ContextID, transform, &Lab, RGB, 1);
 
             *red++ = RGB[0];
             *green++ = RGB[1];
             *blue++ = RGB[2];
         }
-        cmsDeleteTransform(transform);
+        cmsDeleteTransform(ContextID, transform);
 #ifdef OPJ_HAVE_LIBLCMS1
         cmsCloseProfile(in);
         cmsCloseProfile(out);
@@ -986,7 +993,7 @@ void color_cielab_to_rgb(opj_image_t *image)
         return;
 
 fails:
-        cmsDeleteTransform(transform);
+        cmsDeleteTransform(ContextID, transform);
 #ifdef OPJ_HAVE_LIBLCMS1
         cmsCloseProfile(in);
         cmsCloseProfile(out);
@@ -1006,6 +1013,13 @@ fails:
     fprintf(stderr, "%s:%d:\n\tenumCS %d not handled. Ignoring.\n", __FILE__,
             __LINE__, enumcs);
 }/* color_cielab_to_rgb() */
+
+void color_cielab_to_rgb(opj_image_t* image)
+{
+	cmsContext c1 = cmsCreateContext(NULL, NULL);
+	color_cielab_to_rgb_lcms(c1, image);
+	cmsDeleteContext(c1);
+}
 
 #endif /* OPJ_HAVE_LIBLCMS2 || OPJ_HAVE_LIBLCMS1 */
 
