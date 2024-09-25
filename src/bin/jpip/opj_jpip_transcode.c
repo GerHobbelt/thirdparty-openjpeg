@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include "openjpip.h"
 
+#include "monolithic_examples.h"
+
 /*! \file
  *  \brief jpip_to_jp2 is a program to convert JPT- JPP- stream to JP2 file
  *
@@ -103,7 +105,11 @@ static int jpip_to_j2k(char *argv[])
     return 0;
 }
 
-int main(int argc, char *argv[])
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_jpip_transcode_tool_main
+#endif
+
+int main(int argc, const char **argv)
 {
     char *ext;
     if (argc < 3) {

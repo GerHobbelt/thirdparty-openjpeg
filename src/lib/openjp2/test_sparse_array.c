@@ -35,7 +35,7 @@
 
 
 #if defined(BUILD_MONOLITHIC)
-#define main		jp2_test_sparse_array_main
+#define main		opj_test_sparse_array_main
 #endif
 
 int main(void)

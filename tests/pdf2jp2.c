@@ -48,7 +48,20 @@
 #include <stddef.h>
 #include <assert.h>
 
-int main(int argc, char *argv[])
+#include "monolithic_examples.h"
+
+
+// shim for MSVC, which does not provide the memmem() API in its RTL.
+#if defined(_MSC_VER)
+#include "src/bin/common/memmem.c"
+#endif
+
+
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_pdf2jp2_main
+#endif
+
+int main(int argc, const char **argv)
 {
 #define NUMJP2 32
   int i, c = 0;

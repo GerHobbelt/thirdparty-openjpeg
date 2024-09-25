@@ -79,6 +79,8 @@
 #include "format_defs.h"
 #include "opj_string.h"
 
+#include "monolithic_examples.h"
+
 typedef struct dircnt {
     /** Buffer for holding images read from Directory*/
     char *filename_buf;
@@ -163,16 +165,16 @@ typedef struct opj_decompress_params {
 
 /* -------------------------------------------------------------------------- */
 /* Declarations                                                               */
-unsigned int get_num_images(char *imgdirpath);
-int load_images(dircnt_t *dirptr, char *imgdirpath);
-int get_file_format(const char *filename);
-char get_next_file(unsigned int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
+static unsigned int get_num_images(char *imgdirpath);
+static int load_images(dircnt_t *dirptr, char *imgdirpath);
+static int get_file_format(const char *filename);
+static char get_next_file(unsigned int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
                    opj_decompress_parameters *parameters);
 static int infile_format(const char *fname);
 
-int parse_cmdline_decoder(int argc, char **argv,
+static int parse_cmdline_decoder(int argc, char **argv,
                           opj_decompress_parameters *parameters, img_fol_t *img_fol);
-int parse_DA_values(char* inArg, unsigned int *DA_x0, unsigned int *DA_y0,
+static int parse_DA_values(char* inArg, unsigned int *DA_x0, unsigned int *DA_y0,
                     unsigned int *DA_x1, unsigned int *DA_y1);
 
 static opj_image_t* convert_gray_to_rgb(opj_image_t* original);
@@ -375,7 +377,7 @@ static OPJ_BOOL parse_precision(const char* option,
 
 /* -------------------------------------------------------------------------- */
 
-unsigned int get_num_images(char *imgdirpath)
+static unsigned int get_num_images(char *imgdirpath)
 {
     DIR *dir;
     struct dirent* content;
@@ -406,7 +408,7 @@ unsigned int get_num_images(char *imgdirpath)
 }
 
 /* -------------------------------------------------------------------------- */
-int load_images(dircnt_t *dirptr, char *imgdirpath)
+static int load_images(dircnt_t *dirptr, char *imgdirpath)
 {
     DIR *dir;
     struct dirent* content;
@@ -435,7 +437,7 @@ int load_images(dircnt_t *dirptr, char *imgdirpath)
 }
 
 /* -------------------------------------------------------------------------- */
-int get_file_format(const char *filename)
+static int get_file_format(const char *filename)
 {
     unsigned int i;
     static const char * const extension[] = {
@@ -479,7 +481,7 @@ const char* path_separator = "/";
 #endif
 
 /* -------------------------------------------------------------------------- */
-char get_next_file(unsigned int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
+static char get_next_file(unsigned int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
                    opj_decompress_parameters *parameters)
 {
     char image_filename[OPJ_PATH_LEN], infilename[OPJ_PATH_LEN],
@@ -592,7 +594,7 @@ static int infile_format(const char *fname)
  * Parse the command line
  */
 /* -------------------------------------------------------------------------- */
-int parse_cmdline_decoder(int argc, char **argv,
+static int parse_cmdline_decoder(int argc, char **argv,
                           opj_decompress_parameters *parameters, img_fol_t *img_fol)
 {
     /* parse the command line */
@@ -966,7 +968,7 @@ int parse_cmdline_decoder(int argc, char **argv,
  * separator = ","
  */
 /* -------------------------------------------------------------------------- */
-int parse_DA_values(char* inArg, unsigned int *DA_x0, unsigned int *DA_y0,
+static int parse_DA_values(char* inArg, unsigned int *DA_x0, unsigned int *DA_y0,
                     unsigned int *DA_x1, unsigned int *DA_y1)
 {
     int it = 0;
@@ -1347,7 +1349,12 @@ static opj_image_t* upsample_image_components(opj_image_t* original)
  * OPJ_DECOMPRESS MAIN
  */
 /* -------------------------------------------------------------------------- */
-int main(int argc, char **argv)
+
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_decompress_tool_main
+#endif
+
+int main(int argc, const char **argv)
 {
     opj_decompress_parameters parameters;           /* decompression parameters */
 

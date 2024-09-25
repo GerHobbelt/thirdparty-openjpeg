@@ -29,6 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "monolithic_examples.h"
+
 #define CPUID_SSSE3_ECX_BIT     9
 #define CPUID_OSXSAVE_ECX_BIT   27
 #define CPUID_AVX_ECX_BIT       28
@@ -65,7 +67,7 @@
 
 #if defined(__GNUC__) && (defined(__i386__) ||defined(__x86_64))
 
-int CPLHaveRuntimeAVX()
+static int CPLHaveRuntimeAVX()
 {
     int cpuinfo[4] = { 0, 0, 0, 0 };
     unsigned int nXCRLow;
@@ -97,7 +99,7 @@ int CPLHaveRuntimeAVX()
 #elif defined(_MSC_FULL_VER) && (_MSC_FULL_VER >= 160040219) && (defined(_M_IX86) || defined(_M_X64))
 // _xgetbv available only in Visual Studio 2010 SP1 or later
 
-int CPLHaveRuntimeAVX()
+static int CPLHaveRuntimeAVX()
 {
     int cpuinfo[4] = { 0, 0, 0, 0 };
     unsigned __int64 xcrFeatureMask;
@@ -126,7 +128,7 @@ int CPLHaveRuntimeAVX()
 
 #endif
 
-int CPLHaveRuntimeAVX2()
+static int CPLHaveRuntimeAVX2()
 {
     int cpuinfo[4] = { 0, 0, 0, 0 };
     if (!CPLHaveRuntimeAVX()) {
@@ -143,7 +145,11 @@ int CPLHaveRuntimeAVX2()
     return 1;
 }
 
-int main()
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_detect_avx2_tool_main
+#endif
+
+int main(void)
 {
     if (CPLHaveRuntimeAVX2()) {
         return 0;

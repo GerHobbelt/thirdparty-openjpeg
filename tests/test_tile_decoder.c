@@ -53,14 +53,16 @@
 #include "openjpeg.h"
 #include "format_defs.h"
 
+#include "monolithic_examples.h"
+
 
 /* -------------------------------------------------------------------------- */
 /* Declarations                                                               */ 
-int get_file_format(const char *filename);
+static int get_file_format(const char *filename);
 static int infile_format(const char *fname);
 
 /* -------------------------------------------------------------------------- */
-int get_file_format(const char *filename) {
+static int get_file_format(const char *filename) {
         unsigned int i;
         static const char *extension[] = {"pgx", "pnm", "pgm", "ppm", "bmp","tif", "raw", "rawl", "tga", "png", "j2k", "jp2", "jpt", "j2c", "jpc" };
         static const int format[] = { PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, RAW_DFMT, RAWL_DFMT, TGA_DFMT, PNG_DFMT, J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT };
@@ -160,7 +162,11 @@ static void info_callback(const char *msg, void *client_data) {
 
 /* -------------------------------------------------------------------------- */
 
-int main (int argc, char *argv[])
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_tile_decoder_main
+#endif
+
+int main (int argc, const char **argv)
 {
         opj_dparameters_t l_param;
         opj_codec_t * l_codec;

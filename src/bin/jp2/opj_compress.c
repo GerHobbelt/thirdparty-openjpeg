@@ -72,6 +72,8 @@
 #include "format_defs.h"
 #include "opj_string.h"
 
+#include "monolithic_examples.h"
+
 typedef struct dircnt {
     /** Buffer for holding images read from Directory*/
     char *filename_buf;
@@ -1921,7 +1923,12 @@ static OPJ_FLOAT64 opj_clock(void)
  * OPJ_COMPRESS MAIN
  */
 /* -------------------------------------------------------------------------- */
-int main(int argc, char **argv)
+
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_compress_tool_main
+#endif
+
+int main(int argc, const char **argv)
 {
 
     opj_cparameters_t parameters;   /* compression parameters */

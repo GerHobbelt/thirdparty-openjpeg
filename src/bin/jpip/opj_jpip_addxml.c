@@ -53,6 +53,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include "monolithic_examples.h"
+
 
 /**
  * Open JP2 file with the check of JP2 header
@@ -60,7 +62,7 @@
  * @param[in] filename file name string
  * @return             file descriptor
  */
-FILE * open_jp2file(const char filename[]);
+static FILE * open_jp2file(const char filename[]);
 
 
 /**
@@ -70,9 +72,13 @@ FILE * open_jp2file(const char filename[]);
  * @param[out] fsize    file byte size
  * @return              pointer to the xml file content buffer
  */
-char * read_xmlfile(const char filename[], long *fsize);
+static char * read_xmlfile(const char filename[], long *fsize);
 
-int main(int argc, char *argv[])
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_jpip_addxml_tool_main
+#endif
+
+int main(int argc, const char **argv)
 {
     FILE *fp;
     char *xmldata, type[] = "xml ";
@@ -107,7 +113,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-FILE * open_jp2file(const char filename[])
+static FILE * open_jp2file(const char filename[])
 {
     FILE *fp;
     char *data;
@@ -142,7 +148,7 @@ FILE * open_jp2file(const char filename[])
     return fp;
 }
 
-char * read_xmlfile(const char filename[], long *fsize)
+static char * read_xmlfile(const char filename[], long *fsize)
 {
     FILE *fp;
     char *data;

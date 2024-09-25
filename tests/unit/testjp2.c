@@ -28,6 +28,8 @@
 
 #include "openjpeg.h"
 
+#include "monolithic_examples.h"
+
 static void test_colorspace(const char* pszDirectory)
 {
     char szFile[2048];
@@ -130,7 +132,11 @@ static void test_iccprofile(const char* pszDirectory)
     opj_image_destroy(image);
 }
 
-int main(int argc, char* argv[])
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_jp2_main
+#endif
+
+int main(int argc, const char** argv)
 {
     if (argc != 2) {
         fprintf(stderr, "usage: testjp2 /path/to/opj_data_root\n");

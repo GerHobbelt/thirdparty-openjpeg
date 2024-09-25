@@ -33,6 +33,8 @@
 #include "openjpeg.h"
 #include "stdlib.h"
 
+#include "monolithic_examples.h"
+
 /* -------------------------------------------------------------------------- */
 
 /**
@@ -72,8 +74,12 @@ static INLINE OPJ_UINT32 opj_uint_min(OPJ_UINT32  a, OPJ_UINT32  b)
 
 /* -------------------------------------------------------------------------- */
 
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_tile_encoder_main
+#endif
+
 #define NUM_COMPS_MAX 4
-int main(int argc, char *argv[])
+int main(int argc, const char **argv)
 {
     opj_cparameters_t l_param;
     opj_codec_t * l_codec;
@@ -381,9 +387,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-
-
-
-
-

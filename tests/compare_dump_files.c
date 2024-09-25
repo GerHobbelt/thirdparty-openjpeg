@@ -39,6 +39,8 @@
 
 #include "opj_getopt.h"
 
+#include "monolithic_examples.h"
+
 typedef struct test_cmp_parameters
 {
   /**  */
@@ -113,6 +115,11 @@ static int parse_cmdline_cmp(int argc, char **argv, test_cmp_parameters* param)
 /*******************************************************************************
  * MAIN
  *******************************************************************************/
+
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_compare_dump_files_main
+#endif
+
 int main(int argc, char **argv)
 {
   test_cmp_parameters inParam;

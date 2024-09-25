@@ -49,6 +49,8 @@
 #include <tiffio.h> /* TIFFSetWarningHandler */
 #endif /* OPJ_HAVE_LIBTIFF */
 
+#include "monolithic_examples.h"
+
 /*******************************************************************************
  * Parse MSE and PEAK input values (
  * separator = ":"
@@ -653,7 +655,12 @@ static int parse_cmdline_cmp(int argc, char **argv, test_cmp_parameters* param)
 /*******************************************************************************
  * MAIN
  *******************************************************************************/
-int main(int argc, char **argv)
+
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_compare_images_main
+#endif
+
+int main(int argc, const char **argv)
 {
     test_cmp_parameters inParam;
     OPJ_UINT32 it_comp, itpxl;

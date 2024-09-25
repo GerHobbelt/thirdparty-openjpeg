@@ -50,11 +50,18 @@
 #include "opj_config.h"
 #include "openjpip.h"
 
+#include "monolithic_examples.h"
+
 #ifdef _WIN32
-WSADATA initialisation_win32;
+static WSADATA initialisation_win32;
 #endif
 
-int main(int argc, char *argv[])
+
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_dec_server_tool_main
+#endif
+
+int main(int argc, const char **argv)
 {
 
     dec_server_record_t *server_record;

@@ -48,8 +48,14 @@
 #endif
 #include "openjpip.h"
 
+#include "monolithic_examples.h"
+
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_jpip_main
+#endif
+
 int
-main(int argc, char *argv[])
+main(int argc, const char **argv)
 {
     int fd;
     index_t *jp2idx;

@@ -35,6 +35,8 @@
 #include "openjpeg.h"
 #include "format_defs.h"
 
+#include "monolithic_examples.h"
+
 
 /* -------------------------------------------------------------------------- */
 #define JP2_RFC3745_MAGIC "\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
@@ -155,7 +157,7 @@ static opj_codec_t* create_codec_and_stream(const char* input_file,
 }
 
 
-opj_image_t* decode(
+static opj_image_t* decode(
     OPJ_BOOL quiet,
     const char* input_file,
     OPJ_INT32 x0,
@@ -242,7 +244,7 @@ opj_image_t* decode(
     return l_image;
 }
 
-int decode_by_strip(OPJ_BOOL quiet,
+static int decode_by_strip(OPJ_BOOL quiet,
                     const char* input_file,
                     OPJ_UINT32 strip_height,
                     OPJ_INT32 da_x0,
@@ -376,7 +378,7 @@ int decode_by_strip(OPJ_BOOL quiet,
     return 0;
 }
 
-OPJ_BOOL check_consistency(opj_image_t* p_image, opj_image_t* p_sub_image)
+static OPJ_BOOL check_consistency(opj_image_t* p_image, opj_image_t* p_sub_image)
 {
     OPJ_UINT32 compno;
     for (compno = 0; compno < p_image->numcomps; compno ++) {
@@ -411,7 +413,11 @@ static INLINE OPJ_UINT32 opj_uint_min(OPJ_UINT32  a, OPJ_UINT32  b)
     return (a < b) ? a : b;
 }
 
-int main(int argc, char** argv)
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_decode_area_main
+#endif
+
+int main(int argc, const char** argv)
 {
     opj_image_t * l_image = NULL;
     opj_image_t * l_sub_image = NULL;

@@ -253,7 +253,7 @@ typedef struct dirent {
 
     /*** Operating system specific part ***/
 # if defined(DIRENT_WIN32_INTERFACE)       /*WIN32*/
-    WIN32_FIND_DATA data;
+    WIN32_FIND_DATAA data;
 # elif defined(DIRENT_MSDOS_INTERFACE)     /*MS-DOS*/
 #   if defined(DIRENT_USE_FFBLK)
     struct ffblk data;
@@ -466,7 +466,7 @@ readdir(DIR *dirp)
     } else {
         /* fill in entry and return that */
 #if defined(DIRENT_WIN32_INTERFACE)
-        if (FindNextFile(dirp->search_handle, &dirp->current.data) == FALSE) {
+        if (FindNextFileA(dirp->search_handle, &dirp->current.data) == FALSE) {
             /* Last file has been processed or an error occurred */
             FindClose(dirp->search_handle);
             dirp->search_handle = INVALID_HANDLE_VALUE;
@@ -611,7 +611,7 @@ _initdir(DIR *dirp)
 
 # if defined(DIRENT_WIN32_INTERFACE)
     /* Open stream and retrieve first file */
-    dirp->search_handle = FindFirstFile(dirp->dirname, &dirp->current.data);
+    dirp->search_handle = FindFirstFileA(dirp->dirname, &dirp->current.data);
     if (dirp->search_handle == INVALID_HANDLE_VALUE) {
         /* something went wrong but we don't know what.  GetLastError() could
          * give us more information about the error, but then we should map

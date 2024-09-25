@@ -30,32 +30,38 @@
 #include "opj_config.h"
 #include "openjpeg.h"
 
+#include "monolithic_examples.h"
+
 #define J2K_CFMT 0
 
-void error_callback(const char *msg, void *v);
-void warning_callback(const char *msg, void *v);
-void info_callback(const char *msg, void *v);
+static void error_callback(const char *msg, void *v);
+static void warning_callback(const char *msg, void *v);
+static void info_callback(const char *msg, void *v);
 
-void error_callback(const char *msg, void *v)
+static void error_callback(const char *msg, void *v)
 {
     (void)msg;
     (void)v;
     puts(msg);
 }
-void warning_callback(const char *msg, void *v)
+static void warning_callback(const char *msg, void *v)
 {
     (void)msg;
     (void)v;
     puts(msg);
 }
-void info_callback(const char *msg, void *v)
+static void info_callback(const char *msg, void *v)
 {
     (void)msg;
     (void)v;
     puts(msg);
 }
 
-int main(int argc, char *argv[])
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_empty1_main
+#endif
+
+int main(int argc, const char **argv)
 {
     const char * v = opj_version();
 

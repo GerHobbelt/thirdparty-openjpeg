@@ -33,6 +33,8 @@
 #include <string.h> /* strcmp */
 #include <stdlib.h> /* malloc */
 
+#include "monolithic_examples.h"
+
 static const char magic[] = "P6";
 
 static int readheader( FILE *ppm, int *X, int *Y, int *bpp )
@@ -113,7 +115,11 @@ cleanup:
   return ok;
 }
 
-int main(int argc, char *argv[])
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_ppm2rbg3_main
+#endif
+
+int main(int argc, const char **argv)
 {
   const char *fn;
   FILE *ppm = NULL;

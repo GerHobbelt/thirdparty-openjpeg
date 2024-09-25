@@ -42,6 +42,8 @@
 #include "openjpeg.h"
 #include "format_defs.h"
 
+#include "monolithic_examples.h"
+
 /* -------------------------------------------------------------------------- */
 static int get_file_format(const char *filename) {
 	unsigned int i;
@@ -148,7 +150,12 @@ static int infile_format(const char *fname)
  * J2K_RANDOM_TILE_ACCESS MAIN
  */
 /* -------------------------------------------------------------------------- */
-int main(int argc, char **argv)
+
+#if defined(BUILD_MONOLITHIC)
+#define main   opj_test_j2k_random_file_access_main
+#endif
+
+int main(int argc, const char **argv)
 {
     OPJ_UINT32 index;
 	opj_dparameters_t parameters;			/* decompression parameters */
