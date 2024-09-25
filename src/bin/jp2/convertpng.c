@@ -43,7 +43,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <zlib.h>
+#include <zlib-ng.h>
 #include <png.h>
 
 #include "openjpeg.h"
