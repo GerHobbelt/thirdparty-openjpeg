@@ -40,7 +40,7 @@
 #include "opj_includes.h"
 
 // defined elsewhere
-extern OPJ_BOOL vlc_init_tables();
+extern OPJ_BOOL vlc_init_tables(void);
 extern OPJ_BOOL vlc_tables_initialized;
 extern int vlc_tbl0[1024];
 extern int vlc_tbl1[1024];

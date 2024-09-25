@@ -907,7 +907,7 @@ int vlc_tbl1[1024] = { 0 };
   *  @brief Initializes vlc_tbl0 and vlc_tbl1 tables, from table0.h and
   *         table1.h
   */
-OPJ_BOOL vlc_init_tables()
+OPJ_BOOL vlc_init_tables(void)
 {
     const OPJ_BOOL debug = OPJ_FALSE; //useful for checking
 

@@ -46,10 +46,15 @@
  ***************************************** FORWARD DECLARATION ************************************
  **************************************************************************************************/
 
+// forward definitions of types to aid constructing the opj_procedure prototype:
+typedef struct opj_j2k opj_j2k_t;
+typedef struct opj_stream_private opj_stream_private_t;
+typedef struct opj_event_mgr opj_event_mgr_t;
+
 /**
  * declare a function pointer
  */
-typedef void (*opj_procedure)(void);
+typedef OPJ_BOOL (* opj_procedure)(opj_j2k_t *, opj_stream_private_t *, opj_event_mgr_t *);
 
 /**
  * A list of procedures.

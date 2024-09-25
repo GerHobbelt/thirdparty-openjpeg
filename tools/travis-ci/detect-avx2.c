@@ -99,7 +99,7 @@ static int CPLHaveRuntimeAVX()
 #elif defined(_MSC_FULL_VER) && (_MSC_FULL_VER >= 160040219) && (defined(_M_IX86) || defined(_M_X64))
 // _xgetbv available only in Visual Studio 2010 SP1 or later
 
-static int CPLHaveRuntimeAVX()
+static int CPLHaveRuntimeAVX(void)
 {
     int cpuinfo[4] = { 0, 0, 0, 0 };
     unsigned __int64 xcrFeatureMask;
@@ -128,7 +128,7 @@ static int CPLHaveRuntimeAVX()
 
 #endif
 
-static int CPLHaveRuntimeAVX2()
+static int CPLHaveRuntimeAVX2(void)
 {
     int cpuinfo[4] = { 0, 0, 0, 0 };
     if (!CPLHaveRuntimeAVX()) {

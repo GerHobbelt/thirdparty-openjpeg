@@ -2430,8 +2430,7 @@ static OPJ_BOOL opj_jp2_exec(opj_jp2_t * jp2,
                             )
 
 {
-    OPJ_BOOL(** l_procedure)(opj_jp2_t * jp2, opj_stream_private_t *,
-                             opj_event_mgr_t *) = 00;
+	  opj_procedure * l_procedure = 00;
     OPJ_BOOL l_result = OPJ_TRUE;
     OPJ_UINT32 l_nb_proc, i;
 
@@ -2442,8 +2441,7 @@ static OPJ_BOOL opj_jp2_exec(opj_jp2_t * jp2,
     assert(p_manager != 00);
 
     l_nb_proc = opj_procedure_list_get_nb_procedures(p_procedure_list);
-    l_procedure = (OPJ_BOOL(**)(opj_jp2_t * jp2, opj_stream_private_t *,
-                                opj_event_mgr_t *)) opj_procedure_list_get_first_procedure(p_procedure_list);
+    l_procedure = opj_procedure_list_get_first_procedure(p_procedure_list);
 
     for (i = 0; i < l_nb_proc; ++i) {
         l_result = l_result && (*l_procedure)(jp2, stream, p_manager);
