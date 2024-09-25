@@ -1292,6 +1292,7 @@ static int parse_cmdline_encoder(int argc, char **argv,
                 };
                 parameters->max_cs_size = limitMBitsSec[sublevel] * (1000 * 1000 / 8) /
                                           framerate;
+                parameters->max_comp_size = parameters->max_cs_size;
                 fprintf(stdout, "Setting max codestream size to %d bytes.\n",
                         parameters->max_cs_size);
             }
@@ -2155,7 +2156,7 @@ int main(int argc, char **argv)
                 double msamplespersec;
                 if (image->numcomps == 3 &&
                         image->comps[1].dx == 2 &&
-                        image->comps[1].dy == 2) {
+                        image->comps[2].dx == 2) {
                     avgcomponents = 2;
                 }
                 msamplespersec = (double)image->x1 * image->y1 * avgcomponents * framerate /
