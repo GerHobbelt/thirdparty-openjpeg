@@ -2430,7 +2430,7 @@ static OPJ_BOOL opj_jp2_exec(opj_jp2_t * jp2,
                             )
 
 {
-	  opj_procedure * l_procedure = 00;
+	opj_procedure * l_procedure = 00;
     OPJ_BOOL l_result = OPJ_TRUE;
     OPJ_UINT32 l_nb_proc, i;
 
@@ -2444,7 +2444,9 @@ static OPJ_BOOL opj_jp2_exec(opj_jp2_t * jp2,
     l_procedure = opj_procedure_list_get_first_procedure(p_procedure_list);
 
     for (i = 0; i < l_nb_proc; ++i) {
-        l_result = l_result && (*l_procedure)(jp2, stream, p_manager);
+		// fix warning C4133: 'function': incompatible types - from 'opj_jp2_t *' to 'opj_j2k_t *'
+		assert(jp2->j2k != 00);
+        l_result = l_result && (*l_procedure)(jp2->j2k, stream, p_manager);
         ++l_procedure;
     }
 
