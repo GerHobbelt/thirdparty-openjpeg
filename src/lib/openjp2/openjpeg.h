@@ -82,7 +82,7 @@ Most compilers implement their own version of this keyword ...
 #define OPJ_DEPRECATED_STRUCT_MEMBER(memb, msg) memb
 #endif
 
-#if defined(OPJ_STATIC) || !defined(_WIN32)
+#if defined(OPJ_STATIC) || !defined(_WIN32) || defined(BUILD_MONOLITHIC)
 /* http://gcc.gnu.org/wiki/Visibility */
 #   if !defined(_WIN32) && __GNUC__ >= 4
 #       if defined(OPJ_STATIC) /* static library uses "hidden" */
