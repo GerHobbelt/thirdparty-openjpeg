@@ -162,7 +162,7 @@ static OPJ_FLOAT64 opj_wallclock(void)
 
 int main(int argc, const char** argv)
 {
-	int num_threads = 0;
+    int num_threads = 0;
     opj_tcd_t tcd;
     opj_tcd_image_t tcd_image;
     opj_tcd_tile_t tcd_tile;

@@ -53,7 +53,7 @@
 #include "monolithic_examples.h"
 
 #ifdef _WIN32
-static WSADATA initialisation_win32;
+static WSADATA initialisation_win32 = {0};
 #endif
 
 

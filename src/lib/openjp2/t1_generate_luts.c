@@ -215,7 +215,7 @@ static void dump_array16(int array[], int size)
 
 int main(int argc, const char** argv)
 {
-	unsigned int i, j;
+    unsigned int i, j;
     double u, v, t;
 
     int lut_ctxno_zc[2048];

@@ -67,7 +67,7 @@
 
 #if defined(__GNUC__) && (defined(__i386__) ||defined(__x86_64))
 
-static int CPLHaveRuntimeAVX()
+static int CPLHaveRuntimeAVX(void)
 {
     int cpuinfo[4] = { 0, 0, 0, 0 };
     unsigned int nXCRLow;

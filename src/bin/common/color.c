@@ -503,7 +503,7 @@ static void color_apply_icc_profile_lcms(cmsContext ContextID, opj_image_t *imag
 #endif
 
     if (in_prof == NULL) {
-			return;
+        return;
     }
 
     in_space = cmsGetPCS(ContextID, in_prof);
