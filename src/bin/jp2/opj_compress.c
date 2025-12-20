@@ -2252,6 +2252,9 @@ int main(int argc, const char **argv)
         /* open a byte stream for writing and allocate memory for all tiles */
         l_stream = opj_stream_create_default_file_stream(parameters.outfile, OPJ_FALSE);
         if (! l_stream) {
+            fprintf(stderr, "cannot create %s\n", parameters.outfile);
+            opj_destroy_codec(l_codec);
+            opj_image_destroy(image);
             ret = 1;
             goto fin;
         }
@@ -2266,6 +2269,9 @@ int main(int argc, const char **argv)
             OPJ_UINT32 l_data_size = 512 * 512 * 3;
             l_data = (OPJ_BYTE*) calloc(1, l_data_size);
             if (l_data == NULL) {
+                opj_stream_destroy(l_stream);
+                opj_destroy_codec(l_codec);
+                opj_image_destroy(image);
                 ret = 1;
                 goto fin;
             }
