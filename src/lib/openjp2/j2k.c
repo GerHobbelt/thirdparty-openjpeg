@@ -6787,6 +6787,9 @@ void opj_j2k_decoder_set_strict_mode(opj_j2k_t *j2k, OPJ_BOOL strict)
 {
     if (j2k) {
         j2k->m_cp.strict = strict;
+        if (strict) {
+            j2k->m_specific_param.m_decoder.m_nb_tile_parts_correction_checked = 1;
+        }
     }
 }
 
@@ -8338,7 +8341,14 @@ OPJ_BOOL opj_j2k_setup_encoder(opj_j2k_t *p_j2k,
             tccp->qmfbid = parameters->irreversible ? 0 : 1;
             tccp->qntsty = parameters->irreversible ? J2K_CCP_QNTSTY_SEQNT :
                            J2K_CCP_QNTSTY_NOQNT;
-            tccp->numgbits = 2;
+
+            if (OPJ_IS_CINEMA(parameters->rsiz) &&
+                    parameters->rsiz == OPJ_PROFILE_CINEMA_2K) {
+                /* From https://github.com/uclouvain/openjpeg/issues/1340 */
+                tccp->numgbits = 1;
+            } else {
+                tccp->numgbits = 2;
+            }
 
             if ((OPJ_INT32)i == parameters->roi_compno) {
                 tccp->roishift = parameters->roi_shift;
@@ -8477,7 +8487,8 @@ static OPJ_BOOL opj_j2k_add_tlmarker(OPJ_UINT32 tileno,
     if (type == J2K_MS_SOT) {
         OPJ_UINT32 l_current_tile_part = cstr_index->tile_index[tileno].current_tpsno;
 
-        if (cstr_index->tile_index[tileno].tp_index) {
+        if (cstr_index->tile_index[tileno].tp_index &&
+                l_current_tile_part < cstr_index->tile_index[tileno].nb_tps) {
             cstr_index->tile_index[tileno].tp_index[l_current_tile_part].start_pos = pos;
         }
 
@@ -9813,7 +9824,8 @@ OPJ_BOOL opj_j2k_read_tile_header(opj_j2k_t * p_j2k,
             }
 
             /* Why this condition? FIXME */
-            if (p_j2k->m_specific_param.m_decoder.m_state & J2K_STATE_TPH) {
+            if ((p_j2k->m_specific_param.m_decoder.m_state & J2K_STATE_TPH) &&
+                    p_j2k->m_specific_param.m_decoder.m_sot_length != 0) {
                 if (p_j2k->m_specific_param.m_decoder.m_sot_length < l_marker_size + 2) {
                     opj_event_msg(p_manager, EVT_ERROR,
                                   "Sot length is less than marker size + marker ID\n");
@@ -9985,11 +9997,21 @@ OPJ_BOOL opj_j2k_read_tile_header(opj_j2k_t * p_j2k,
             if (p_j2k->m_specific_param.m_decoder.m_can_decode &&
                     !p_j2k->m_specific_param.m_decoder.m_nb_tile_parts_correction_checked) {
                 /* Issue 254 */
-                OPJ_BOOL l_correction_needed;
+                OPJ_BOOL l_correction_needed = OPJ_FALSE;
 
                 p_j2k->m_specific_param.m_decoder.m_nb_tile_parts_correction_checked = 1;
-                if (!opj_j2k_need_nb_tile_parts_correction(p_stream,
-                        p_j2k->m_current_tile_number, &l_correction_needed, p_manager)) {
+                if (p_j2k->m_cp.tcps[p_j2k->m_current_tile_number].m_nb_tile_parts == 1) {
+                    /* Skip opj_j2k_need_nb_tile_parts_correction() if there is
+                     * only a single tile part declared. The
+                     * opj_j2k_need_nb_tile_parts_correction() hack was needed
+                     * for files with 5 declared tileparts (where they were
+                     * actually 6).
+                     * Doing it systematically hurts performance when reading
+                     * Sentinel2 L1C JPEG2000 files as explained in
+                     * https://lists.osgeo.org/pipermail/gdal-dev/2024-November/059805.html
+                     */
+                } else if (!opj_j2k_need_nb_tile_parts_correction(p_stream,
+                           p_j2k->m_current_tile_number, &l_correction_needed, p_manager)) {
                     opj_event_msg(p_manager, EVT_ERROR,
                                   "opj_j2k_apply_nb_tile_parts_correction error\n");
                     return OPJ_FALSE;
