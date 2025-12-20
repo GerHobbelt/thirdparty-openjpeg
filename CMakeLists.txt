@@ -7,7 +7,7 @@
 # For this purpose you can define a CMake var: OPENJPEG_NAMESPACE to whatever you like
 # e.g.:
 # set(OPENJPEG_NAMESPACE "GDCMOPENJPEG")
-cmake_minimum_required(VERSION 3.5...3.31.5)
+cmake_minimum_required(VERSION 3.10...3.31.5)
 
 if(NOT OPENJPEG_NAMESPACE)
   set(OPENJPEG_NAMESPACE "OPENJPEG")
@@ -346,7 +346,7 @@ function(get_pkgconfig_deps NAME OUT)
     list(REMOVE_ITEM link_libs "${OPENJPEG_LIBRARY_NAME}")
     set(deps "")
     foreach(item IN LISTS link_libs)
-      if(item STREQUAL "-pthread")
+      if(item STREQUAL "-pthread" OR item STREQUAL "-lpthread")
         string(APPEND deps " ${item}")
       else()
         string(APPEND deps " -l${item}")
