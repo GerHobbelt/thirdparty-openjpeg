@@ -1593,6 +1593,7 @@ static OPJ_BOOL opj_jp2_read_colr(opj_jp2_t *jp2,
     if (jp2->color.jp2_has_colr) {
         jp2->j2k->enumcs = jp2->enumcs;
     }
+
     return OPJ_TRUE;
 }
 
@@ -2449,7 +2450,7 @@ static OPJ_BOOL opj_jp2_exec(opj_jp2_t * jp2,
     for (i = 0; i < l_nb_proc; ++i) {
 		// fix warning C4133: 'function': incompatible types - from 'opj_jp2_t *' to 'opj_j2k_t *'
 		assert(jp2->j2k != 00);
-        l_result = l_result && (*l_procedure)(jp2->j2k, stream, p_manager);
+        l_result = l_result && (*l_procedure)((opj_j2k_t *)jp2, stream, p_manager);
         ++l_procedure;
     }
 
